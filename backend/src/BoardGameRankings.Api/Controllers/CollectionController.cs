@@ -5,22 +5,15 @@ namespace BoardGameRankings.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CollectionController : ControllerBase
+public class CollectionController(ICollectionService collectionService) : ControllerBase
 {
-    private readonly ICollectionService _collectionService;
-
-    public CollectionController(ICollectionService collectionService)
-    {
-        _collectionService = collectionService;
-    }
-
     [HttpGet("{username}")]
     public async Task<IActionResult> GetCollection(string username)
     {
         if (string.IsNullOrWhiteSpace(username))
             return BadRequest("Username is required.");
 
-        var collection = await _collectionService.GetUserCollectionAsync(username);
+        var collection = await collectionService.GetUserCollectionAsync(username);
         return Ok(collection);
     }
 }

@@ -4,25 +4,17 @@ using BoardGameRankings.Domain.Interfaces;
 
 namespace BoardGameRankings.Application.Services;
 
-public class MechanismAnalysisService : IMechanismAnalysisService
+public class MechanismAnalysisService(
+    IBoardGameRepository boardGameRepository,
+    IUserRatingRepository userRatingRepository)
+    : IMechanismAnalysisService
 {
-    private readonly IBoardGameRepository _boardGameRepository;
-    private readonly IUserRatingRepository _userRatingRepository;
-
-    public MechanismAnalysisService(
-        IBoardGameRepository boardGameRepository,
-        IUserRatingRepository userRatingRepository)
-    {
-        _boardGameRepository = boardGameRepository;
-        _userRatingRepository = userRatingRepository;
-    }
-
     public async Task<IReadOnlyList<MechanismScoreDto>> GetMechanismScoresAsync(string username, ScoringMode mode = ScoringMode.Average)
     {
-        var games = await _boardGameRepository.GetAllAsync(username);
-        var ratings = await _userRatingRepository.GetAllAsync(username);
-
+        var ratings = await userRatingRepository.GetAllAsync(username);
         var ratingLookup = ratings.ToDictionary(r => r.GameId, r => r.Rating);
+
+        var games = await boardGameRepository.GetByIdsAsync(ratingLookup.Keys);
 
         // Build mechanism -> list of ratings mapping
         var mechanismRatings = new Dictionary<(int Id, string Name), List<decimal>>();

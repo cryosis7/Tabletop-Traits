@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Xml.Linq;
 using BoardGameRankings.Domain.Entities;
@@ -5,7 +6,7 @@ using BoardGameRankings.Domain.Interfaces;
 
 namespace BoardGameRankings.Infrastructure.BggApi;
 
-public class BggApiClient : IBggApiClient
+public class BggXmlApiClient : IBggApiClient
 {
     private const string BaseUrl = "https://boardgamegeek.com/xmlapi2";
     private const int BatchSize = 20;
@@ -16,7 +17,7 @@ public class BggApiClient : IBggApiClient
     private readonly SemaphoreSlim _rateLimiter = new(1, 1);
     private DateTime _lastRequestTime = DateTime.MinValue;
 
-    public BggApiClient(HttpClient httpClient)
+    public BggXmlApiClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }
@@ -25,11 +26,11 @@ public class BggApiClient : IBggApiClient
         string username, CancellationToken cancellationToken = default)
     {
         var url = $"{BaseUrl}/collection?username={Uri.EscapeDataString(username)}&rated=1&subtype=boardgame&stats=1";
-
         var xml = await GetWithRetryAsync(url, cancellationToken);
+
         var doc = XDocument.Parse(xml);
 
-        var items = doc.Descendants("item")
+        return doc.Descendants("item")
             .Select(item =>
             {
                 var gameId = int.Parse(item.Attribute("objectid")!.Value);
@@ -37,15 +38,13 @@ public class BggApiClient : IBggApiClient
                 var ratingStr = item.Descendants("rating")
                     .FirstOrDefault()?.Attribute("value")?.Value;
 
-                if (ratingStr == null || !decimal.TryParse(ratingStr, out var rating))
+                if (ratingStr == null || !decimal.TryParse(ratingStr, NumberStyles.Number, CultureInfo.InvariantCulture, out var rating))
                     return (GameId: gameId, Name: name, Rating: 0m);
 
                 return (GameId: gameId, Name: name, Rating: rating);
             })
             .Where(x => x.Rating > 0)
             .ToList();
-
-        return items;
     }
 
     public async Task<IReadOnlyList<BoardGame>> GetGameDetailsAsync(
@@ -53,6 +52,7 @@ public class BggApiClient : IBggApiClient
     {
         var allGames = new List<BoardGame>();
         var idBatches = gameIds
+            .Distinct()
             .Select((id, index) => new { id, index })
             .GroupBy(x => x.index / BatchSize)
             .Select(g => g.Select(x => x.id).ToList());
@@ -101,7 +101,6 @@ public class BggApiClient : IBggApiClient
 
             if (response.StatusCode == HttpStatusCode.Accepted)
             {
-                // BGG queues the request - wait and retry
                 await Task.Delay(RetryDelayMs, cancellationToken);
                 continue;
             }

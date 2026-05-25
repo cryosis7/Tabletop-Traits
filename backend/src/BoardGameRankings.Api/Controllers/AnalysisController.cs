@@ -5,15 +5,8 @@ namespace BoardGameRankings.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AnalysisController : ControllerBase
+public class AnalysisController(IMechanismAnalysisService analysisService) : ControllerBase
 {
-    private readonly IMechanismAnalysisService _analysisService;
-
-    public AnalysisController(IMechanismAnalysisService analysisService)
-    {
-        _analysisService = analysisService;
-    }
-
     [HttpGet("{username}/mechanisms")]
     public async Task<IActionResult> GetMechanismScores(
         string username,
@@ -28,7 +21,7 @@ public class AnalysisController : ControllerBase
             _ => ScoringMode.Average
         };
 
-        var scores = await _analysisService.GetMechanismScoresAsync(username, scoringMode);
+        var scores = await analysisService.GetMechanismScoresAsync(username, scoringMode);
         return Ok(scores);
     }
 }

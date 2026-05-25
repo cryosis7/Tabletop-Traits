@@ -6,7 +6,10 @@ namespace BoardGameRankings.Infrastructure.Persistence;
 
 public class JsonBoardGameRepository : IBoardGameRepository
 {
-    private readonly string _basePath;
+    private readonly string _filePath;
+    private readonly SemaphoreSlim _lock = new(1, 1);
+    private Dictionary<int, BoardGame>? _cache;
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -15,56 +18,91 @@ public class JsonBoardGameRepository : IBoardGameRepository
 
     public JsonBoardGameRepository(string basePath)
     {
-        _basePath = basePath;
+        _filePath = Path.Combine(basePath, "games.json");
     }
 
-    public async Task<IReadOnlyList<BoardGame>> GetAllAsync(string username)
+    public async Task<IReadOnlyList<BoardGame>> GetByIdsAsync(IEnumerable<int> gameIds)
     {
-        var filePath = GetFilePath(username);
-        if (!File.Exists(filePath))
-            return Array.Empty<BoardGame>();
+        var cache = await GetCacheAsync();
+        return gameIds
+            .Where(cache.ContainsKey)
+            .Select(id => cache[id])
+            .ToList();
+    }
 
-        var json = await File.ReadAllTextAsync(filePath);
+    public async Task SaveAsync(IReadOnlyList<BoardGame> games)
+    {
+        await _lock.WaitAsync();
+        try
+        {
+            var cache = await LoadFromDiscAsync();
+
+            foreach (var game in games)
+            {
+                cache[game.Id] = game;
+            }
+
+            _cache = cache;
+
+            var directory = Path.GetDirectoryName(_filePath)!;
+            Directory.CreateDirectory(directory);
+
+            var records = cache.Values.Select(g => new BoardGameRecord
+            {
+                Id = g.Id,
+                Name = g.Name,
+                YearPublished = g.YearPublished,
+                ThumbnailUrl = g.ThumbnailUrl,
+                Mechanisms = g.Mechanisms.Select(m => new MechanismRecord { Id = m.Id, Name = m.Name }).ToList()
+            }).ToList();
+
+            var json = JsonSerializer.Serialize(records, JsonOptions);
+            await File.WriteAllTextAsync(_filePath, json);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    private async Task<Dictionary<int, BoardGame>> GetCacheAsync()
+    {
+        if (_cache != null)
+            return _cache;
+
+        await _lock.WaitAsync();
+        try
+        {
+            _cache ??= await LoadFromDiscAsync();
+            return _cache;
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    private async Task<Dictionary<int, BoardGame>> LoadFromDiscAsync()
+    {
+        if (!File.Exists(_filePath))
+            return new Dictionary<int, BoardGame>();
+
+        var json = await File.ReadAllTextAsync(_filePath);
         var records = JsonSerializer.Deserialize<List<BoardGameRecord>>(json, JsonOptions);
         if (records == null)
-            return Array.Empty<BoardGame>();
+            return new Dictionary<int, BoardGame>();
 
-        return records.Select(r => new BoardGame(
-            r.Id,
-            r.Name,
-            r.YearPublished,
-            r.ThumbnailUrl,
-            r.Mechanisms.Select(m => new Mechanism(m.Id, m.Name)).ToList()
-        )).ToList();
+        return records.ToDictionary(
+            r => r.Id,
+            r => new BoardGame(
+                r.Id,
+                r.Name,
+                r.YearPublished,
+                r.ThumbnailUrl,
+                r.Mechanisms.Select(m => new Mechanism(m.Id, m.Name)).ToList()
+            )
+        );
     }
-
-    public async Task<BoardGame?> GetByIdAsync(string username, int gameId)
-    {
-        var games = await GetAllAsync(username);
-        return games.FirstOrDefault(g => g.Id == gameId);
-    }
-
-    public async Task SaveAsync(string username, IReadOnlyList<BoardGame> games)
-    {
-        var filePath = GetFilePath(username);
-        var directory = Path.GetDirectoryName(filePath)!;
-        Directory.CreateDirectory(directory);
-
-        var records = games.Select(g => new BoardGameRecord
-        {
-            Id = g.Id,
-            Name = g.Name,
-            YearPublished = g.YearPublished,
-            ThumbnailUrl = g.ThumbnailUrl,
-            Mechanisms = g.Mechanisms.Select(m => new MechanismRecord { Id = m.Id, Name = m.Name }).ToList()
-        }).ToList();
-
-        var json = JsonSerializer.Serialize(records, JsonOptions);
-        await File.WriteAllTextAsync(filePath, json);
-    }
-
-    private string GetFilePath(string username) =>
-        Path.Combine(_basePath, username.ToLowerInvariant(), "games.json");
 
     private record BoardGameRecord
     {
