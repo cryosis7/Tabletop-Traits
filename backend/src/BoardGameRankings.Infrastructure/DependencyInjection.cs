@@ -25,7 +25,10 @@ public static class DependencyInjection
             client.DefaultRequestHeaders.Add("User-Agent", "BoardGameRankings/1.0");
         });
 
-        services.AddScoped<IBggApiClient>(sp => sp.GetRequiredService<BggHtmlClient>());
+        services.AddScoped<IBggApiClient>(sp =>
+            new CachingBggApiClient(
+                sp.GetRequiredService<BggHtmlClient>(),
+                sp.GetRequiredService<IBoardGameRepository>()));
 
         // Application Services
         services.AddScoped<ISyncService, SyncService>();

@@ -7,7 +7,6 @@ namespace BoardGameRankings.Application.Services;
 
 public class SyncService(
     IBggApiClient bggApiClient,
-    IBoardGameRepository boardGameRepository,
     IUserRatingRepository userRatingRepository)
     : ISyncService
 {
@@ -21,26 +20,17 @@ public class SyncService(
             return new SyncStatusDto("Complete", 0, 0, DateTime.UtcNow);
         }
 
-        // Step 2: Only fetch game details for games we don't already have
+        // Step 2: Fetch game details
         var gameIds = collectionItems.Select(c => c.GameId).ToList();
-        var existingGames = await boardGameRepository.GetByIdsAsync(gameIds);
-        var existingIds = existingGames.Select(g => g.Id).ToHashSet();
-        var missingIds = gameIds.Where(id => !existingIds.Contains(id)).ToList();
+        var games = await bggApiClient.GetGameDetailsAsync(gameIds, cancellationToken);
 
-        if (missingIds.Count > 0)
-        {
-            var newGames = await bggApiClient.GetGameDetailsAsync(missingIds, cancellationToken);
-            await boardGameRepository.SaveAsync(newGames);
-        }
-
-        // Step 3: Build user ratings
+        // Step 3: Build and persist user ratings
         var ratings = collectionItems
             .Select(c => new UserRating(c.GameId, username, c.Rating))
             .ToList();
 
-        // Step 4: Persist ratings
         await userRatingRepository.SaveAsync(username, ratings);
 
-        return new SyncStatusDto("Complete", existingGames.Count + missingIds.Count, collectionItems.Count, DateTime.UtcNow);
+        return new SyncStatusDto("Complete", games.Count, collectionItems.Count, DateTime.UtcNow);
     }
 }

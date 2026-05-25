@@ -17,7 +17,10 @@ if (builder.Environment.IsDevelopment())
 }
 
 // Data storage path
-var dataPath = Path.Combine(builder.Environment.ContentRootPath, "..", "..", "data");
+var configuredDataPath = builder.Configuration["DataPath"];
+var dataPath = string.IsNullOrWhiteSpace(configuredDataPath)
+    ? Path.Combine(builder.Environment.ContentRootPath, "..", "..", "data")
+    : Path.GetFullPath(configuredDataPath);
 
 // Register infrastructure + application services
 builder.Services.AddInfrastructure(dataPath, builder.Configuration);
@@ -25,8 +28,18 @@ builder.Services.AddInfrastructure(dataPath, builder.Configuration);
 // Controllers
 builder.Services.AddControllers();
 
-// OpenAPI/Swagger
-builder.Services.AddOpenApi();
+// OpenAPI
+builder.Services.AddOpenApi("v1", options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info.Title = "Board Game Rankings API";
+        document.Info.Version = "v1";
+        document.Info.Description = "Synchronizes BoardGameGeek collections, exposes stored rated games, and returns mechanism-based preference analysis for a user.";
+
+        return Task.CompletedTask;
+    });
+});
 
 // CORS for frontend dev server
 builder.Services.AddCors(options =>
@@ -44,6 +57,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.RoutePrefix = "swagger";
+        options.DocumentTitle = "Board Game Rankings API Docs";
+        options.SwaggerEndpoint("/openapi/v1.json", "Board Game Rankings API v1");
+    });
 }
 
 app.UseCors();

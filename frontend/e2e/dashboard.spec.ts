@@ -2,14 +2,23 @@ import { test, expect, type Page } from "@playwright/test";
 
 const fixtureUsername = "testuser";
 const fixtureGames = ["5-Minute Dungeon", "Dune: Imperium", "Dominion"];
+const paginatedFixtureUsername = "Brezman";
+const paginatedFixtureGames = ["1775: Rebellion", "Star Wars: Outer Rim", "Wingspan"];
+const paginatedFixtureGameCount = 370;
 
-async function syncCollection(page: Page, username: string = fixtureUsername): Promise<void> {
+async function syncCollection(
+  page: Page,
+  username: string = fixtureUsername,
+  expectedGameCount: number = 5
+): Promise<void> {
   await page.getByPlaceholder("Enter your BGG username").fill(username);
   await page.getByRole("button", { name: "Sync & Analyze" }).click();
 
-  await expect(page.getByRole("status")).toContainText("Synced 5 games from BGG");
+  await expect(page.getByRole("status")).toContainText(`Synced ${expectedGameCount} games from BGG`);
   await expect(page.getByRole("region", { name: "Mechanism analysis" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "Your Rated Games (5)" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: `Your Rated Games (${expectedGameCount})` })
+  ).toBeVisible();
   await expect(page.getByRole("table")).toBeVisible();
 }
 
@@ -41,6 +50,17 @@ test.describe("Board Game Rankings E2E", () => {
     await expect(collectionTable.getByRole("row")).toHaveCount(6);
 
     for (const gameName of fixtureGames) {
+      await expect(collectionTable.getByRole("cell", { name: gameName })).toBeVisible();
+    }
+  });
+
+  test("syncs Brezman's paginated collection and includes games from page 2", async ({ page }) => {
+    test.slow();
+
+    await syncCollection(page, paginatedFixtureUsername, paginatedFixtureGameCount);
+
+    const collectionTable = page.getByRole("table");
+    for (const gameName of paginatedFixtureGames) {
       await expect(collectionTable.getByRole("cell", { name: gameName })).toBeVisible();
     }
   });

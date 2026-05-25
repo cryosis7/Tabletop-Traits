@@ -1,4 +1,8 @@
+import os from "node:os";
+import path from "node:path";
 import { defineConfig } from "@playwright/test";
+
+const playwrightDataPath = path.join(os.tmpdir(), "board-game-rankings-playwright-data");
 
 export default defineConfig({
   testDir: "./e2e",
@@ -22,6 +26,7 @@ export default defineConfig({
       timeout: 30000,
       env: {
         ASPNETCORE_ENVIRONMENT: "Development",
+        DataPath: playwrightDataPath,
       },
     },
     {

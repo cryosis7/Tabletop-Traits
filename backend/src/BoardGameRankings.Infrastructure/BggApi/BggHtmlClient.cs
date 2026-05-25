@@ -7,43 +7,33 @@ using HtmlAgilityPack;
 
 namespace BoardGameRankings.Infrastructure.BggApi;
 
-public class BggHtmlClient : IBggApiClient
+public class BggHtmlClient(HttpClient httpClient) : IBggApiClient
 {
-    private static readonly Regex CollectionSummaryRegex = new(@"(?<start>\d+)\s+to\s+(?<end>\d+)\s+of\s+(?<total>\d+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex CollectionSummaryRegex = new(@"(?<start>[\d,]+)\s+to\s+(?<end>[\d,]+)\s+of\s+(?<total>[\d,]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex CollectionPagerRegex = new(@"CE_SetPage\(\s*(?<page>\d+)\s*\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex GameHrefRegex = new(@"/boardgame/(?<id>\d+)/", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex GeekItemPreloadRegex = new(@"GEEK\.geekitemPreload = (?<json>\{.*?\});", RegexOptions.Compiled | RegexOptions.Singleline);
 
-    private readonly HttpClient _httpClient;
     private readonly SemaphoreSlim _rateLimiter = new(1, 1);
     private DateTime _lastRequestTime = DateTime.MinValue;
-
-    public BggHtmlClient(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
 
     public async Task<IReadOnlyList<(int GameId, string Name, decimal Rating)>> GetUserRatedCollectionAsync(
         string username, CancellationToken cancellationToken = default)
     {
-        var pageNumber = 1;
         var items = new List<(int GameId, string Name, decimal Rating)>();
-        var totalPages = 1;
+        var visitedPages = new HashSet<int>();
+        int? pageNumber = 1;
 
-        do
+        while (pageNumber.HasValue && visitedPages.Add(pageNumber.Value))
         {
-            var url = $"/collection/user/{Uri.EscapeDataString(username)}?rated=1&subtype=boardgame&all=1&pageID={pageNumber}";
+            var currentPageNumber = pageNumber.Value;
+            var url = $"/collection/user/{Uri.EscapeDataString(username)}?rated=1&subtype=boardgame&all=1&pageID={currentPageNumber}";
             var html = await GetHtmlAsync(url, cancellationToken);
-            var parsedPage = ParseCollectionHtmlPage(html);
-
-            if (pageNumber == 1)
-            {
-                totalPages = parsedPage.TotalPages;
-            }
+            var parsedPage = ParseCollectionHtmlPage(html, currentPageNumber);
 
             items.AddRange(parsedPage.Items);
-            pageNumber++;
+            pageNumber = parsedPage.NextPageNumber;
         }
-        while (pageNumber <= totalPages);
 
         return items
             .GroupBy(item => item.GameId)
@@ -67,7 +57,9 @@ public class BggHtmlClient : IBggApiClient
         return games;
     }
 
-    private static (IReadOnlyList<(int GameId, string Name, decimal Rating)> Items, int TotalPages) ParseCollectionHtmlPage(string html)
+    private static (IReadOnlyList<(int GameId, string Name, decimal Rating)> Items, int? NextPageNumber) ParseCollectionHtmlPage(
+        string html,
+        int currentPageNumber)
     {
         var document = new HtmlDocument();
         document.LoadHtml(html);
@@ -110,22 +102,46 @@ public class BggHtmlClient : IBggApiClient
             }
         }
 
-        var pageCount = 1;
-        var summaryMatch = CollectionSummaryRegex.Match(document.DocumentNode.InnerText);
-        if (summaryMatch.Success
-            && int.TryParse(summaryMatch.Groups["start"].Value, out var start)
-            && int.TryParse(summaryMatch.Groups["end"].Value, out var end)
-            && int.TryParse(summaryMatch.Groups["total"].Value, out var total)
-            && end >= start)
+        int? nextPageNumber = null;
+        var pagerLinks = document.DocumentNode.SelectNodes("//div[contains(@class,'geekcollection_pager')]//a[contains(@onclick,'CE_SetPage')]");
+        if (pagerLinks != null)
         {
-            var pageSize = end - start + 1;
-            if (pageSize > 0)
+            nextPageNumber = pagerLinks
+                .Select(link => CollectionPagerRegex.Match(link.GetAttributeValue("onclick", string.Empty)))
+                .Where(match => match.Success && int.TryParse(match.Groups["page"].Value, out _))
+                .Select(match => int.Parse(match.Groups["page"].Value, CultureInfo.InvariantCulture))
+                .Where(page => page > currentPageNumber)
+                .DefaultIfEmpty()
+                .Min();
+
+            if (nextPageNumber == 0)
             {
-                pageCount = (int)Math.Ceiling(total / (double)pageSize);
+                nextPageNumber = null;
             }
         }
 
-        return (items, pageCount);
+        var summaryMatch = CollectionSummaryRegex.Match(document.DocumentNode.InnerText);
+        if (summaryMatch.Success
+            && TryParseCollectionNumber(summaryMatch.Groups["end"].Value, out var end)
+            && TryParseCollectionNumber(summaryMatch.Groups["total"].Value, out var total)
+            && end < total)
+        {
+            if (!nextPageNumber.HasValue)
+            {
+                nextPageNumber = currentPageNumber + 1;
+            }
+        }
+
+        return (items, nextPageNumber);
+    }
+
+    private static bool TryParseCollectionNumber(string value, out int parsedValue)
+    {
+        return int.TryParse(
+            value.Replace(",", string.Empty),
+            NumberStyles.None,
+            CultureInfo.InvariantCulture,
+            out parsedValue);
     }
 
     private static BoardGame ParseGameDetailsHtmlPage(int gameId, string html)
@@ -185,7 +201,7 @@ public class BggHtmlClient : IBggApiClient
     {
         await RateLimitAsync(cancellationToken);
 
-        var response = await _httpClient.GetAsync(url, cancellationToken);
+        var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadAsStringAsync(cancellationToken);
@@ -193,6 +209,11 @@ public class BggHtmlClient : IBggApiClient
 
     private async Task RateLimitAsync(CancellationToken cancellationToken)
     {
+        if (httpClient.BaseAddress?.IsLoopback == true)
+        {
+            return;
+        }
+
         await _rateLimiter.WaitAsync(cancellationToken);
         try
         {

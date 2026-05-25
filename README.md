@@ -62,6 +62,8 @@ board-game-rankings/
 | GET | `/api/analysis/{username}/mechanisms?mode=average\|cumulative` | Get mechanism scores |
 | GET | `/api/collection/{username}` | Get rated games with mechanisms |
 
+When the backend is running in development, Swagger UI is available at `http://localhost:5237/swagger` and the raw OpenAPI document is available at `http://localhost:5237/openapi/v1.json`.
+
 ## Charts
 
 - **Bar Chart** - Mechanisms ranked by score (top 20), color-coded by rating

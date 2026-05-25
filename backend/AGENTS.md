@@ -45,6 +45,7 @@ Api → Infrastructure → Application → Domain
 - Prefer `IReadOnlyList<T>` or `IEnumerable<T>` for return types over mutable collections.
 - Keep controllers thin; delegate logic to Application services.
 - Use strongly-typed configuration via `IOptions<T>` where applicable.
+- Use primary constructors when possible
 
 ### Anti-Patterns to Avoid
 
