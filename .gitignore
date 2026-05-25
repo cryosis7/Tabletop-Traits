@@ -1,0 +1,58 @@
+# =============================================================================
+# .NET
+# =============================================================================
+## Build results
+backend/**/bin/
+backend/**/obj/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build logs
+*.log
+
+## Visual Studio
+.vs/
+*.ncrunchproject
+*.ncrunchsolution
+
+## NuGet
+**/packages/
+*.nupkg
+
+## Data files (generated at runtime)
+backend/data/
+
+# =============================================================================
+# Node / Frontend
+# =============================================================================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+## Environment
+.env
+.env.local
+.env.*.local
+
+## IDE
+.idea/
+*.swp
+*.swo
+*~
+
+## OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+## Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
