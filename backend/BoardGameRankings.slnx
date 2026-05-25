@@ -4,6 +4,7 @@
     <Project Path="src/BoardGameRankings.Application/BoardGameRankings.Application.csproj" />
     <Project Path="src/BoardGameRankings.Domain/BoardGameRankings.Domain.csproj" />
     <Project Path="src/BoardGameRankings.Infrastructure/BoardGameRankings.Infrastructure.csproj" />
+    <Project Path="src/BoardGameRankings.DevTools/BoardGameRankings.DevTools.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/BoardGameRankings.Application.Tests/BoardGameRankings.Application.Tests.csproj" />

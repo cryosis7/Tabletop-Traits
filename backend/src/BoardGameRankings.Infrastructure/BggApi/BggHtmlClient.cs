@@ -9,7 +9,6 @@ namespace BoardGameRankings.Infrastructure.BggApi;
 
 public class BggHtmlClient : IBggApiClient
 {
-    private const string BaseUrl = "https://boardgamegeek.com";
     private static readonly Regex CollectionSummaryRegex = new(@"(?<start>\d+)\s+to\s+(?<end>\d+)\s+of\s+(?<total>\d+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex GameHrefRegex = new(@"/boardgame/(?<id>\d+)/", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex GeekItemPreloadRegex = new(@"GEEK\.geekitemPreload = (?<json>\{.*?\});", RegexOptions.Compiled | RegexOptions.Singleline);
@@ -32,7 +31,7 @@ public class BggHtmlClient : IBggApiClient
 
         do
         {
-            var url = $"{BaseUrl}/collection/user/{Uri.EscapeDataString(username)}?rated=1&subtype=boardgame&all=1&pageID={pageNumber}";
+            var url = $"/collection/user/{Uri.EscapeDataString(username)}?rated=1&subtype=boardgame&all=1&pageID={pageNumber}";
             var html = await GetHtmlAsync(url, cancellationToken);
             var parsedPage = ParseCollectionHtmlPage(html);
 
@@ -60,7 +59,7 @@ public class BggHtmlClient : IBggApiClient
 
         foreach (var gameId in ids)
         {
-            var url = $"{BaseUrl}/boardgame/{gameId}";
+            var url = $"/boardgame/{gameId}";
             var html = await GetHtmlAsync(url, cancellationToken);
             games.Add(ParseGameDetailsHtmlPage(gameId, html));
         }

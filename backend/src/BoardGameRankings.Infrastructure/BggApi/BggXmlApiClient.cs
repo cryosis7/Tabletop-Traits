@@ -8,7 +8,6 @@ namespace BoardGameRankings.Infrastructure.BggApi;
 
 public class BggXmlApiClient : IBggApiClient
 {
-    private const string BaseUrl = "https://boardgamegeek.com/xmlapi2";
     private const int BatchSize = 20;
     private const int RetryDelayMs = 3000;
     private const int MaxRetries = 10;
@@ -25,7 +24,7 @@ public class BggXmlApiClient : IBggApiClient
     public async Task<IReadOnlyList<(int GameId, string Name, decimal Rating)>> GetUserRatedCollectionAsync(
         string username, CancellationToken cancellationToken = default)
     {
-        var url = $"{BaseUrl}/collection?username={Uri.EscapeDataString(username)}&rated=1&subtype=boardgame&stats=1";
+        var url = $"/xmlapi2/collection?username={Uri.EscapeDataString(username)}&rated=1&subtype=boardgame&stats=1";
         var xml = await GetWithRetryAsync(url, cancellationToken);
 
         var doc = XDocument.Parse(xml);
@@ -60,7 +59,7 @@ public class BggXmlApiClient : IBggApiClient
         foreach (var batch in idBatches)
         {
             var idsCsv = string.Join(",", batch);
-            var url = $"{BaseUrl}/thing?id={idsCsv}&type=boardgame";
+            var url = $"/xmlapi2/thing?id={idsCsv}&type=boardgame";
 
             var xml = await GetWithRetryAsync(url, cancellationToken);
             var doc = XDocument.Parse(xml);

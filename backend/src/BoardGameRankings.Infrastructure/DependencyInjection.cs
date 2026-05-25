@@ -3,14 +3,17 @@ using BoardGameRankings.Application.Services;
 using BoardGameRankings.Domain.Interfaces;
 using BoardGameRankings.Infrastructure.BggApi;
 using BoardGameRankings.Infrastructure.Persistence;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BoardGameRankings.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string dataPath)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string dataPath, IConfiguration configuration)
     {
+        var bggBaseUrl = configuration["BggApi:BaseUrl"] ?? "https://boardgamegeek.com";
+
         // Repositories
         services.AddSingleton<IBoardGameRepository>(new JsonBoardGameRepository(dataPath));
         services.AddSingleton<IUserRatingRepository>(new JsonUserRatingRepository(dataPath));
@@ -18,11 +21,13 @@ public static class DependencyInjection
         // BGG Clients
         services.AddHttpClient<BggXmlApiClient>(client =>
         {
+            client.BaseAddress = new Uri(bggBaseUrl);
             client.DefaultRequestHeaders.Add("User-Agent", "BoardGameRankings/1.0");
         });
 
         services.AddHttpClient<BggHtmlClient>(client =>
         {
+            client.BaseAddress = new Uri(bggBaseUrl);
             client.DefaultRequestHeaders.Add("User-Agent", "BoardGameRankings/1.0");
         });
 

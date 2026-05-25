@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items totalitems="5" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse" pubdate="Sun, 25 May 2026 00:00:00 +0000">
+  <item objecttype="thing" objectid="207830" subtype="boardgame" collid="1001">
+    <name sortindex="1">5-Minute Dungeon</name>
+    <yearpublished>2017</yearpublished>
+    <status own="1" rated="1" />
+    <stats minplayers="2" maxplayers="5" numowned="12345">
+      <rating value="8">
+        <average value="7.2" />
+      </rating>
+    </stats>
+  </item>
+  <item objecttype="thing" objectid="236457" subtype="boardgame" collid="1002">
+    <name sortindex="1">Architects of the West Kingdom</name>
+    <yearpublished>2018</yearpublished>
+    <status own="1" rated="1" />
+    <stats minplayers="1" maxplayers="5" numowned="23456">
+      <rating value="7">
+        <average value="7.8" />
+      </rating>
+    </stats>
+  </item>
+  <item objecttype="thing" objectid="368173" subtype="boardgame" collid="1003">
+    <name sortindex="1">Dune: Imperium</name>
+    <yearpublished>2020</yearpublished>
+    <status own="1" rated="1" />
+    <stats minplayers="1" maxplayers="4" numowned="45678">
+      <rating value="9">
+        <average value="8.4" />
+      </rating>
+    </stats>
+  </item>
+  <item objecttype="thing" objectid="478" subtype="boardgame" collid="1004">
+    <name sortindex="1">Citadels</name>
+    <yearpublished>2000</yearpublished>
+    <status own="1" rated="1" />
+    <stats minplayers="2" maxplayers="8" numowned="56789">
+      <rating value="7">
+        <average value="7.1" />
+      </rating>
+    </stats>
+  </item>
+  <item objecttype="thing" objectid="36218" subtype="boardgame" collid="1005">
+    <name sortindex="1">Dominion</name>
+    <yearpublished>2008</yearpublished>
+    <status own="1" rated="1" />
+    <stats minplayers="2" maxplayers="4" numowned="67890">
+      <rating value="5">
+        <average value="7.6" />
+      </rating>
+    </stats>
+  </item>
+</items>

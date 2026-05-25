@@ -4,9 +4,9 @@ using BoardGameRankings.Domain.Interfaces;
 
 namespace BoardGameRankings.Infrastructure.Persistence;
 
-public class JsonBoardGameRepository : IBoardGameRepository
+public class JsonBoardGameRepository(string basePath) : IBoardGameRepository
 {
-    private readonly string _filePath;
+    private readonly string _filePath = Path.Combine(basePath, "games.json");
     private readonly SemaphoreSlim _lock = new(1, 1);
     private Dictionary<int, BoardGame>? _cache;
 
@@ -15,11 +15,6 @@ public class JsonBoardGameRepository : IBoardGameRepository
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
-
-    public JsonBoardGameRepository(string basePath)
-    {
-        _filePath = Path.Combine(basePath, "games.json");
-    }
 
     public async Task<IReadOnlyList<BoardGame>> GetByIdsAsync(IEnumerable<int> gameIds)
     {
