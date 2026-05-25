@@ -18,20 +18,14 @@ public static class DependencyInjection
         services.AddSingleton<IBoardGameRepository>(new JsonBoardGameRepository(dataPath));
         services.AddSingleton<IUserRatingRepository>(new JsonUserRatingRepository(dataPath));
 
-        // BGG Clients
-        services.AddHttpClient<BggXmlApiClient>(client =>
-        {
-            client.BaseAddress = new Uri(bggBaseUrl);
-            client.DefaultRequestHeaders.Add("User-Agent", "BoardGameRankings/1.0");
-        });
-
+        // BGG Client (HTML scraper)
         services.AddHttpClient<BggHtmlClient>(client =>
         {
             client.BaseAddress = new Uri(bggBaseUrl);
             client.DefaultRequestHeaders.Add("User-Agent", "BoardGameRankings/1.0");
         });
 
-        services.AddScoped<IBggApiClient, BggFallbackApiClient>();
+        services.AddScoped<IBggApiClient>(sp => sp.GetRequiredService<BggHtmlClient>());
 
         // Application Services
         services.AddScoped<ISyncService, SyncService>();
