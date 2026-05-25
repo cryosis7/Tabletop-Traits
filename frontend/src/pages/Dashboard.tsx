@@ -54,7 +54,7 @@ export function Dashboard() {
 
         {syncError && <p className="error">{syncError}</p>}
         {syncStatus && (
-          <p className="sync-info">
+          <p className="sync-info" role="status" aria-live="polite">
             Synced {syncStatus.gamesProcessed} games from BGG
             {syncStatus.lastSyncTime && ` at ${new Date(syncStatus.lastSyncTime).toLocaleTimeString()}`}
           </p>
@@ -67,12 +67,16 @@ export function Dashboard() {
             <div className="mode-toggle">
               <label>Scoring Mode:</label>
               <button
+                type="button"
+                aria-pressed={mode === "average"}
                 className={mode === "average" ? "active" : ""}
                 onClick={() => handleModeChange("average")}
               >
                 Average Rating
               </button>
               <button
+                type="button"
+                aria-pressed={mode === "cumulative"}
                 className={mode === "cumulative" ? "active" : ""}
                 onClick={() => handleModeChange("cumulative")}
               >
@@ -81,19 +85,34 @@ export function Dashboard() {
             </div>
 
             <div className="tab-toggle">
-              <button className={activeTab === "bar" ? "active" : ""} onClick={() => setActiveTab("bar")}>
+              <button
+                type="button"
+                aria-pressed={activeTab === "bar"}
+                className={activeTab === "bar" ? "active" : ""}
+                onClick={() => setActiveTab("bar")}
+              >
                 Bar Chart
               </button>
-              <button className={activeTab === "radar" ? "active" : ""} onClick={() => setActiveTab("radar")}>
+              <button
+                type="button"
+                aria-pressed={activeTab === "radar"}
+                className={activeTab === "radar" ? "active" : ""}
+                onClick={() => setActiveTab("radar")}
+              >
                 Radar
               </button>
-              <button className={activeTab === "scatter" ? "active" : ""} onClick={() => setActiveTab("scatter")}>
+              <button
+                type="button"
+                aria-pressed={activeTab === "scatter"}
+                className={activeTab === "scatter" ? "active" : ""}
+                onClick={() => setActiveTab("scatter")}
+              >
                 Scatter
               </button>
             </div>
           </section>
 
-          <section className="chart-section">
+          <section className="chart-section" aria-label="Mechanism analysis">
             {scoresLoading && <p>Loading scores...</p>}
             {scoresError && <p className="error">{scoresError}</p>}
 

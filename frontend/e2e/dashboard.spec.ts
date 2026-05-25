@@ -1,118 +1,112 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+const fixtureUsername = "testuser";
+const fixtureGames = ["5-Minute Dungeon", "Dune: Imperium", "Dominion"];
+
+async function syncCollection(page: Page, username: string = fixtureUsername): Promise<void> {
+  await page.getByPlaceholder("Enter your BGG username").fill(username);
+  await page.getByRole("button", { name: "Sync & Analyze" }).click();
+
+  await expect(page.getByRole("status")).toContainText("Synced 5 games from BGG");
+  await expect(page.getByRole("region", { name: "Mechanism analysis" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Your Rated Games (5)" })).toBeVisible();
+  await expect(page.getByRole("table")).toBeVisible();
+}
 
 test.describe("Board Game Rankings E2E", () => {
-  test("syncs a user collection and displays mechanism analysis", async ({
-    page,
-  }) => {
+  test.beforeEach(async ({ page }) => {
     await page.goto("/");
-
-    // Verify initial page state
-    await expect(page.locator("h1")).toHaveText(
-      "Board Game Mechanism Analyzer"
-    );
-
-    // Enter username and sync
-    const input = page.getByPlaceholder("Enter your BGG username");
-    await input.fill("testuser");
-    await page.getByRole("button", { name: "Sync & Analyze" }).click();
-
-    // Wait for sync to complete and data to load
-    await expect(page.locator(".sync-info")).toBeVisible({ timeout: 15000 });
-    await expect(page.locator(".sync-info")).toContainText("Synced 5 games");
-
-    // Verify mechanism chart section appears (bar chart is default)
-    await expect(page.locator(".chart-section")).toBeVisible();
-
-    // Verify collection table is rendered with the 5 games from the mock
-    await expect(page.locator(".collection-table")).toBeVisible();
-    const rows = page.locator(".collection-table tbody tr");
-    await expect(rows).toHaveCount(5);
-
-    // Verify known game names from the HTML fixtures appear
-    await expect(page.locator(".collection-table")).toContainText(
-      "5-Minute Dungeon"
-    );
-    await expect(page.locator(".collection-table")).toContainText(
-      "Dune: Imperium"
-    );
-    await expect(page.locator(".collection-table")).toContainText("Dominion");
   });
 
-  test("switches scoring mode between average and cumulative", async ({
-    page,
-  }) => {
-    await page.goto("/");
+  test("syncs a user collection and displays mechanism analysis", async ({ page }) => {
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Board Game Mechanism Analyzer",
+      })
+    ).toBeVisible();
 
-    // Sync first
-    await page.getByPlaceholder("Enter your BGG username").fill("testuser");
-    await page.getByRole("button", { name: "Sync & Analyze" }).click();
-    await expect(page.locator(".sync-info")).toBeVisible({ timeout: 15000 });
+    await syncCollection(page);
 
-    // Default mode is average
+    await expect(page.getByRole("button", { name: "Average Rating" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    await expect(page.getByRole("button", { name: "Bar Chart" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+
+    const collectionTable = page.getByRole("table");
+    await expect(collectionTable.getByRole("row")).toHaveCount(6);
+
+    for (const gameName of fixtureGames) {
+      await expect(collectionTable.getByRole("cell", { name: gameName })).toBeVisible();
+    }
+  });
+
+  test("switches scoring mode between average and cumulative", async ({ page }) => {
+    await syncCollection(page);
+
     const averageBtn = page.getByRole("button", { name: "Average Rating" });
     const cumulativeBtn = page.getByRole("button", { name: "Cumulative" });
-    await expect(averageBtn).toHaveClass(/active/);
+    await expect(averageBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(cumulativeBtn).toHaveAttribute("aria-pressed", "false");
 
-    // Switch to cumulative
     await cumulativeBtn.click();
-    await expect(cumulativeBtn).toHaveClass(/active/);
-    await expect(averageBtn).not.toHaveClass(/active/);
+    await expect(cumulativeBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(averageBtn).toHaveAttribute("aria-pressed", "false");
   });
 
   test("switches between chart tabs", async ({ page }) => {
-    await page.goto("/");
+    await syncCollection(page);
 
-    // Sync first
-    await page.getByPlaceholder("Enter your BGG username").fill("testuser");
-    await page.getByRole("button", { name: "Sync & Analyze" }).click();
-    await expect(page.locator(".sync-info")).toBeVisible({ timeout: 15000 });
-
-    // Bar chart is the default tab
     const barBtn = page.getByRole("button", { name: "Bar Chart" });
     const radarBtn = page.getByRole("button", { name: "Radar" });
     const scatterBtn = page.getByRole("button", { name: "Scatter" });
-    await expect(barBtn).toHaveClass(/active/);
+    await expect(barBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(radarBtn).toHaveAttribute("aria-pressed", "false");
+    await expect(scatterBtn).toHaveAttribute("aria-pressed", "false");
 
-    // Switch to radar
     await radarBtn.click();
-    await expect(radarBtn).toHaveClass(/active/);
-    await expect(barBtn).not.toHaveClass(/active/);
+    await expect(radarBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(barBtn).toHaveAttribute("aria-pressed", "false");
 
-    // Switch to scatter
     await scatterBtn.click();
-    await expect(scatterBtn).toHaveClass(/active/);
-    await expect(radarBtn).not.toHaveClass(/active/);
+    await expect(scatterBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(radarBtn).toHaveAttribute("aria-pressed", "false");
   });
 
   test("displays mechanisms in the collection table", async ({ page }) => {
-    await page.goto("/");
+    await syncCollection(page);
 
-    await page.getByPlaceholder("Enter your BGG username").fill("testuser");
-    await page.getByRole("button", { name: "Sync & Analyze" }).click();
-    await expect(page.locator(".collection-table")).toBeVisible({
-      timeout: 15000,
-    });
-
-    // Verify mechanisms are shown for games (from fixture data)
-    await expect(page.locator(".collection-table")).toContainText(
+    const collectionTable = page.getByRole("table");
+    await expect(collectionTable.getByRole("row", { name: /Dune: Imperium/ })).toContainText(
       "Worker Placement"
     );
-    await expect(page.locator(".collection-table")).toContainText(
+    await expect(collectionTable.getByRole("row", { name: /5-Minute Dungeon/ })).toContainText(
       "Hand Management"
     );
   });
 
   test("disables sync button while syncing", async ({ page }) => {
-    await page.goto("/");
-
     const input = page.getByPlaceholder("Enter your BGG username");
     const syncBtn = page.getByRole("button", { name: /Sync/ });
 
-    // Button disabled when input is empty
     await expect(syncBtn).toBeDisabled();
 
-    // Button enabled with text
-    await input.fill("testuser");
+    await input.fill(fixtureUsername);
     await expect(syncBtn).toBeEnabled();
+
+    await page.route(`**/api/sync/${fixtureUsername}`, async (route) => {
+      const response = await route.fetch();
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      await route.fulfill({ response });
+    });
+
+    await syncBtn.click();
+    await expect(syncBtn).toBeDisabled();
+    await expect(syncBtn).toHaveText("Syncing...");
+    await expect(page.getByRole("status")).toContainText("Synced 5 games from BGG");
   });
 });
