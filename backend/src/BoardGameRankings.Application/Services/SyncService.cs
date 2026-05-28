@@ -1,36 +1,30 @@
 using BoardGameRankings.Application.DTOs;
 using BoardGameRankings.Application.Interfaces;
-using BoardGameRankings.Domain.Entities;
 using BoardGameRankings.Domain.Interfaces;
 
 namespace BoardGameRankings.Application.Services;
 
 public class SyncService(
-    IBggApiClient bggApiClient,
+    IBoardGameRepository boardGameRepository,
     IUserRatingRepository userRatingRepository)
     : ISyncService
 {
     public async Task<SyncStatusDto> SyncUserCollectionAsync(string username, CancellationToken cancellationToken = default)
     {
-        // Step 1: Fetch user's rated collection from BGG
-        var collectionItems = await bggApiClient.GetUserRatedCollectionAsync(username, cancellationToken);
+        // Invalidate cached ratings so the next read fetches fresh data from BGG
+        userRatingRepository.Invalidate(username);
 
-        if (collectionItems.Count == 0)
+        var ratings = await userRatingRepository.GetAllAsync(username, cancellationToken);
+
+        if (ratings.Count == 0)
         {
             return new SyncStatusDto("Complete", 0, 0, DateTime.UtcNow);
         }
 
-        // Step 2: Fetch game details
-        var gameIds = collectionItems.Select(c => c.GameId).ToList();
-        var games = await bggApiClient.GetGameDetailsAsync(gameIds, cancellationToken);
+        // Ensure game details are cached
+        var gameIds = ratings.Select(r => r.GameId).ToList();
+        var games = await boardGameRepository.GetByIdsAsync(gameIds, cancellationToken);
 
-        // Step 3: Build and persist user ratings
-        var ratings = collectionItems
-            .Select(c => new UserRating(c.GameId, username, c.Rating))
-            .ToList();
-
-        await userRatingRepository.SaveAsync(username, ratings);
-
-        return new SyncStatusDto("Complete", games.Count, collectionItems.Count, DateTime.UtcNow);
+        return new SyncStatusDto("Complete", games.Count, ratings.Count, DateTime.UtcNow);
     }
 }

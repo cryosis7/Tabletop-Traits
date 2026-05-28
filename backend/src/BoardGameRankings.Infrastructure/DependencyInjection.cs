@@ -10,17 +10,16 @@ namespace BoardGameRankings.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string dataPath, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var bggBaseUrl = configuration["BggApi:BaseUrl"] ?? "https://boardgamegeek.com";
         var bggBearerToken = configuration["BggApi:BearerToken"] ?? string.Empty;
 
-        // Repositories
-        services.AddSingleton<IBoardGameRepository>(new JsonBoardGameRepository(dataPath));
-        services.AddSingleton<IUserRatingRepository>(new JsonUserRatingRepository(dataPath));
+        // In-memory cache (singleton by default)
+        services.AddMemoryCache();
 
-        // BGG Client (XML API v2)
-        services.AddHttpClient<BggXmlApiClient>(client =>
+        // BGG API Client
+        services.AddHttpClient<IBggApiClient, BggXmlApiClient>(client =>
         {
             client.BaseAddress = new Uri(bggBaseUrl);
             client.DefaultRequestHeaders.Add("User-Agent", "BoardGameRankings/1.0");
@@ -31,10 +30,9 @@ public static class DependencyInjection
             }
         });
 
-        services.AddScoped<IBggApiClient>(sp =>
-            new CachingBggApiClient(
-                sp.GetRequiredService<BggXmlApiClient>(),
-                sp.GetRequiredService<IBoardGameRepository>()));
+        // Repositories (singleton - backed by IMemoryCache)
+        services.AddSingleton<IBoardGameRepository, CachedBoardGameRepository>();
+        services.AddSingleton<IUserRatingRepository, CachedUserRatingRepository>();
 
         // Application Services
         services.AddScoped<ISyncService, SyncService>();

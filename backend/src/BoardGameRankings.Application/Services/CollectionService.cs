@@ -17,6 +17,7 @@ public class CollectionService(
         var games = await boardGameRepository.GetByIdsAsync(ratingLookup.Keys);
 
         return games
+            .Where(g => ratingLookup.ContainsKey(g.Id))
             .Select(g => new BoardGameDto(
                 g.Id,
                 g.Name,

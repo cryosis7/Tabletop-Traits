@@ -16,14 +16,8 @@ if (builder.Environment.IsDevelopment())
     Log.Information("BGG mock server started at {Url}", bggMock.Url);
 }
 
-// Data storage path
-var configuredDataPath = builder.Configuration["DataPath"];
-var dataPath = string.IsNullOrWhiteSpace(configuredDataPath)
-    ? Path.Combine(builder.Environment.ContentRootPath, "..", "..", "data")
-    : Path.GetFullPath(configuredDataPath);
-
 // Register infrastructure + application services
-builder.Services.AddInfrastructure(dataPath, builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // Controllers
 builder.Services.AddControllers();
