@@ -17,6 +17,7 @@ interface Props {
   maxItems?: number;
   selectedMechanisms?: string[];
   onBarClick?: (mechanismName: string, ctrlKey: boolean) => void;
+  descriptions?: Map<string, string>;
 }
 
 function getRatingColor(value: number, max: number): string {
@@ -28,7 +29,7 @@ function getRatingColor(value: number, max: number): string {
   return "#ef4444";
 }
 
-export function MechanismBarChart({ scores, mode, maxItems = 20, selectedMechanisms = [], onBarClick }: Props) {
+export function MechanismBarChart({ scores, mode, maxItems = 20, selectedMechanisms = [], onBarClick, descriptions }: Props) {
   const data = scores.slice(0, maxItems).map((s) => ({
     name: s.mechanismName,
     value: mode === "average" ? s.averageRating : s.totalRating,
@@ -45,10 +46,20 @@ export function MechanismBarChart({ scores, mode, maxItems = 20, selectedMechani
           <XAxis type="number" domain={[0, "auto"]} />
           <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 12 }} />
           <Tooltip
-            formatter={(value, _name, props) => [
-              `${Number(value).toFixed(2)} (${(props.payload as { gameCount: number }).gameCount} games)`,
-              mode === "average" ? "Avg Rating" : "Total Rating",
-            ]}
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const data = payload[0].payload as { name: string; value: number; gameCount: number };
+              const desc = descriptions?.get(data.name);
+              return (
+                <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px", maxWidth: 300 }}>
+                  <strong style={{ color: "#a5b4fc" }}>{data.name}</strong>
+                  {desc && <p style={{ margin: "4px 0 6px", fontSize: "0.8rem", opacity: 0.85 }}>{desc}</p>}
+                  <p style={{ margin: 0, fontSize: "0.85rem" }}>
+                    {mode === "average" ? "Avg Rating" : "Total Rating"}: {data.value.toFixed(2)} ({data.gameCount} games)
+                  </p>
+                </div>
+              );
+            }}
           />
           <Bar
             dataKey="value"

@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
-import { useSync, useMechanismScores, useCollection } from "../hooks/useApi";
+import { useSync, useMechanismScores, useCollection, useMechanismDescriptions } from "../hooks/useApi";
 import { MechanismBarChart } from "../components/charts/MechanismBarChart";
 import { MechanismRadarChart } from "../components/charts/MechanismRadarChart";
 import { MechanismScatterChart } from "../components/charts/MechanismScatterChart";
 import { MechanismFilter } from "../components/MechanismFilter";
+import { MechanismTooltip } from "../components/MechanismTooltip";
 import type { ScoringMode, FilterMode } from "../types";
 
 export function Dashboard() {
@@ -17,6 +18,7 @@ export function Dashboard() {
   const { sync, syncing, syncStatus, error: syncError } = useSync();
   const { scores, loading: scoresLoading, error: scoresError, fetchScores } = useMechanismScores();
   const { collection, loading: collectionLoading, fetchCollection } = useCollection();
+  const { descriptions, fetchDescriptions } = useMechanismDescriptions();
 
   const handleSync = async () => {
     if (!username.trim()) return;
@@ -24,6 +26,7 @@ export function Dashboard() {
     setActiveUser(username.trim());
     await fetchScores(username.trim(), mode);
     await fetchCollection(username.trim());
+    await fetchDescriptions();
   };
 
   const handleModeChange = async (newMode: ScoringMode) => {
@@ -152,6 +155,7 @@ export function Dashboard() {
                 mode={mode}
                 selectedMechanisms={selectedMechanisms}
                 onBarClick={handleChartClick}
+                descriptions={descriptions}
               />
             )}
             {activeTab === "radar" && (
@@ -177,6 +181,7 @@ export function Dashboard() {
               filterMode={filterMode}
               onSelectionChange={setSelectedMechanisms}
               onFilterModeChange={setFilterMode}
+              descriptions={descriptions}
             />
           </section>
 
@@ -208,9 +213,11 @@ export function Dashboard() {
                         {game.mechanisms.map((m, i) => (
                           <span key={m}>
                             {i > 0 && ", "}
-                            <span className={selectedMechanisms.includes(m) ? "mechanism-highlight" : ""}>
-                              {m}
-                            </span>
+                            <MechanismTooltip
+                              text={m}
+                              description={descriptions.get(m)}
+                              className={selectedMechanisms.includes(m) ? "mechanism-highlight" : ""}
+                            />
                           </span>
                         ))}
                       </td>

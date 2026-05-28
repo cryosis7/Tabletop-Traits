@@ -25,3 +25,9 @@ export interface SyncStatus {
 export type ScoringMode = "average" | "cumulative";
 
 export type FilterMode = "any" | "all";
+
+export interface MechanismDescription {
+  id: number;
+  name: string;
+  description: string;
+}

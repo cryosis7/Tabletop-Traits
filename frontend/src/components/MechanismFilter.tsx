@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { FilterMode } from "../types";
+import { MechanismTooltip } from "./MechanismTooltip";
 
 interface Props {
   mechanisms: string[];
@@ -7,6 +8,7 @@ interface Props {
   filterMode: FilterMode;
   onSelectionChange: (selected: string[]) => void;
   onFilterModeChange: (mode: FilterMode) => void;
+  descriptions: Map<string, string>;
 }
 
 export function MechanismFilter({
@@ -15,6 +17,7 @@ export function MechanismFilter({
   filterMode,
   onSelectionChange,
   onFilterModeChange,
+  descriptions,
 }: Props): React.ReactElement {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -63,7 +66,10 @@ export function MechanismFilter({
             <ul className="filter-dropdown">
               {filtered.slice(0, 15).map((m) => (
                 <li key={m} onMouseDown={() => addMechanism(m)}>
-                  {m}
+                  <span>{m}</span>
+                  {descriptions.get(m) && (
+                    <span className="mechanism-description">{descriptions.get(m)}</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -92,7 +98,7 @@ export function MechanismFilter({
         <div className="filter-chips">
           {selected.map((m) => (
             <span key={m} className="chip">
-              {m}
+              <MechanismTooltip text={m} description={descriptions.get(m)} />
               <button type="button" className="chip-remove" onClick={() => removeMechanism(m)}>
                 &times;
               </button>

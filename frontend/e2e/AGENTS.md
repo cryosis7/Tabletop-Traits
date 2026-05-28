@@ -30,8 +30,10 @@ This guide covers how to write and maintain end-to-end tests for the React front
 
 ### Use deterministic data
 
-- Base expectations on known fixture users and ratings.
-- Keep assertions aligned with the mock backend data, not live BoardGameGeek responses.
+- The fixture user is `cryosis7`. Test expectations should align with this user's data.
+- Backend fixture data lives in `backend/data/games.json` (game catalog) and `backend/data/cryosis7/ratings.json` (user ratings).
+- HTML mocks of BGG pages are embedded in `backend/src/BoardGameRankings.DevTools/Fixtures/`.
+- Playwright config overrides `DataPath` to a temp directory, isolating e2e runs from local dev data.
 - When fixture data changes, update test expectations in the same change.
 
 ## React-Specific Guidance
@@ -96,10 +98,19 @@ This guide covers how to write and maintain end-to-end tests for the React front
 ## Local Commands
 
 ```powershell
+# Run all e2e tests (preferred - starts backend + frontend automatically)
 npm run test:e2e
+
+# Run a single spec file
 npx playwright test e2e/dashboard.spec.ts
+
+# Run headed for debugging
 npx playwright test --headed
 ```
+
+## Verification
+
+Always run `npm run test:e2e` from the `frontend/` directory after modifying any frontend component, page, hook, or backend controller. The Playwright config automatically starts both the .NET backend (port 5237, Development mode with mock BGG server) and the Vite dev server (port 5173). All tests must pass before committing.
 
 ## Maintenance Notes
 

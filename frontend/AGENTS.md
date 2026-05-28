@@ -61,7 +61,19 @@ React 19 single-page application (TypeScript, Vite) that displays board game col
 
 ## Testing
 
-When tests are added, follow these conventions:
+### E2E Tests (Playwright)
+
+E2E tests exist in `e2e/` and cover user-visible flows against the real backend with fixture data. See `e2e/AGENTS.md` for detailed conventions.
+
+```powershell
+# Run all e2e tests (starts backend + frontend automatically)
+npm run test:e2e
+
+# Run a specific spec
+npx playwright test e2e/dashboard.spec.ts
+```
+
+### Unit Tests (when added)
 
 - Prefer React Testing Library for component tests.
 - Test user-visible behavior, not implementation details.

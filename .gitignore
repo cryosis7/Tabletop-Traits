@@ -26,6 +26,7 @@ backend/**/obj/
 
 ## Data files (generated at runtime)
 backend/data/
+!backend/data/mechanisms.json
 
 # =============================================================================
 # Node / Frontend

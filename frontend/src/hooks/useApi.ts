@@ -67,3 +67,23 @@ export function useCollection() {
 
   return { collection, loading, error, fetchCollection };
 }
+
+export function useMechanismDescriptions() {
+  const [descriptions, setDescriptions] = useState<Map<string, string>>(new Map());
+  const [loading, setLoading] = useState(false);
+
+  const fetchDescriptions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.getMechanismDescriptions();
+      const map = new Map(data.map((d) => [d.name, d.description]));
+      setDescriptions(map);
+    } catch {
+      // Non-critical - tooltips just won't show
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { descriptions, loading, fetchDescriptions };
+}

@@ -326,3 +326,36 @@ button.active {
   color: var(--primary);
   font-weight: 600;
 }
+
+.mechanism-tooltip {
+  pointer-events: none;
+}
+
+.mechanism-tooltip-content {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 8px 12px;
+  max-width: 300px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mechanism-tooltip-content strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #a5b4fc;
+}
+
+.mechanism-tooltip-content p {
+  margin: 0;
+}
+
+.filter-dropdown .mechanism-description {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 2px;
+  line-height: 1.3;
+}

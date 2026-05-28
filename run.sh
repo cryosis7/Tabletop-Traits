@@ -2,7 +2,26 @@
 set -e
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-MODE="${1:-dev}"
+MODE="dev"
+NO_SEQ=false
+
+for arg in "$@"; do
+  case "$arg" in
+    --prod)   MODE="prod" ;;
+    --dev)    MODE="dev" ;;
+    --no-seq) NO_SEQ=true ;;
+    -h|--help)
+      echo "Usage: ./run.sh [options]"
+      echo ""
+      echo "Options:"
+      echo "  --dev      Start in development mode (default)"
+      echo "  --prod     Build and start in production mode"
+      echo "  --no-seq   Skip starting Seq (dev mode only)"
+      echo "  -h, --help Show this help message"
+      exit 0
+      ;;
+  esac
+done
 
 if [ "$MODE" = "prod" ]; then
   echo "Building frontend..."
@@ -20,8 +39,10 @@ if [ "$MODE" = "prod" ]; then
   echo "Backend:  http://localhost:5237"
   echo "Frontend: http://localhost:4173"
 else
-  echo "Starting dev services (Seq)..."
-  (cd "$ROOT/backend" && docker compose up -d)
+  if [ "$NO_SEQ" = false ]; then
+    echo "Starting dev services (Seq)..."
+    (cd "$ROOT/backend" && docker compose up -d)
+  fi
 
   echo "Starting backend..."
   (cd "$ROOT/backend" && dotnet run --project src/BoardGameRankings.Api) &
@@ -34,7 +55,7 @@ else
   echo ""
   echo "Backend:  http://localhost:5237"
   echo "Frontend: http://localhost:5173"
-  echo "Seq:      http://localhost:8081"
+  [ "$NO_SEQ" = false ] && echo "Seq:      http://localhost:8081"
 fi
 
 echo ""

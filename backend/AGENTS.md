@@ -2,7 +2,7 @@
 
 ## Overview
 
-ASP.NET Core Web API (.NET 9, C#) that syncs board game collection data from the BoardGameGeek XML API, stores it as JSON files, and provides endpoints for collection browsing and mechanism-based analysis.
+ASP.NET Core Web API (.NET 10, C#) that syncs board game collection data from the BoardGameGeek XML API, caches it in memory, and provides endpoints for collection browsing and mechanism-based analysis.
 
 ## Architecture
 
@@ -17,8 +17,9 @@ Api → Infrastructure → Application → Domain
 |-------|------|----------------|
 | Domain | `src/BoardGameRankings.Domain/` | Entities, Value Objects, repository interfaces. Zero external dependencies. |
 | Application | `src/BoardGameRankings.Application/` | Services, DTOs, use-case orchestration. Depends only on Domain. |
-| Infrastructure | `src/BoardGameRankings.Infrastructure/` | BGG XML API client, JSON file persistence, DI registration. Depends on Domain + Application. |
-| Api | `src/BoardGameRankings.Api/` | Controllers, middleware, DI composition root. Depends on Application + Infrastructure. |
+| Infrastructure | `src/BoardGameRankings.Infrastructure/` | BGG XML API client, in-memory cached repositories, DI registration. Depends on Domain + Application. |
+| Api | `src/BoardGameRankings.Api/` | Controllers, middleware, DI composition root. Depends on Application + Infrastructure + DevTools (dev only). |
+| DevTools | `src/BoardGameRankings.DevTools/` | WireMock-based BGG mock server and HTML fixtures. Used by Api in Development mode and by tests. |
 
 ### Key Conventions
 
@@ -58,17 +59,17 @@ Api → Infrastructure → Application → Domain
 ## Testing
 
 - Framework: xUnit
-- Mocking: Moq
+- Mocking: WireMock.Net (HTTP-level mocking via DevTools fixtures)
 - Test projects mirror source structure:
   - `tests/BoardGameRankings.Domain.Tests/` - Domain entity and value object tests
-  - `tests/BoardGameRankings.Application.Tests/` - Service tests with mocked repositories
+  - `tests/BoardGameRankings.Application.Tests/` - Integration tests against WireMock fixtures
 
 ### Conventions
 
 - One test class per production class.
 - Test method naming: `MethodName_Scenario_ExpectedResult`.
 - Arrange/Act/Assert structure in every test.
-- Mock all external dependencies (repositories, API clients).
+- Use the `BggMockFixture` class to stand up WireMock with HTML fixtures from DevTools.
 - Test edge cases: null inputs, empty collections, invalid data.
 
 ## Error Handling

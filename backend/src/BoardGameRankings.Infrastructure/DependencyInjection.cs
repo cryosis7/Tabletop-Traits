@@ -33,11 +33,13 @@ public static class DependencyInjection
         // Repositories (singleton - backed by IMemoryCache)
         services.AddSingleton<IBoardGameRepository, CachedBoardGameRepository>();
         services.AddSingleton<IUserRatingRepository, CachedUserRatingRepository>();
+        services.AddSingleton<IMechanismDescriptionRepository, JsonMechanismDescriptionRepository>();
 
         // Application Services
         services.AddScoped<ISyncService, SyncService>();
         services.AddScoped<IMechanismAnalysisService, MechanismAnalysisService>();
         services.AddScoped<ICollectionService, CollectionService>();
+        services.AddScoped<IMechanismDescriptionService, MechanismDescriptionService>();
 
         return services;
     }
