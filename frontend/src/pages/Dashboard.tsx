@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSync, useMechanismScores, useCollection } from "../hooks/useApi";
 import { MechanismBarChart } from "../components/charts/MechanismBarChart";
 import { MechanismRadarChart } from "../components/charts/MechanismRadarChart";
 import { MechanismScatterChart } from "../components/charts/MechanismScatterChart";
-import type { ScoringMode } from "../types";
+import { MechanismFilter } from "../components/MechanismFilter";
+import type { ScoringMode, FilterMode } from "../types";
 
 export function Dashboard() {
   const [username, setUsername] = useState("");
   const [activeUser, setActiveUser] = useState("");
   const [mode, setMode] = useState<ScoringMode>("average");
   const [activeTab, setActiveTab] = useState<"bar" | "radar" | "scatter">("bar");
+  const [selectedMechanisms, setSelectedMechanisms] = useState<string[]>([]);
+  const [filterMode, setFilterMode] = useState<FilterMode>("any");
 
   const { sync, syncing, syncStatus, error: syncError } = useSync();
   const { scores, loading: scoresLoading, error: scoresError, fetchScores } = useMechanismScores();
@@ -29,6 +32,33 @@ export function Dashboard() {
       await fetchScores(activeUser, newMode);
     }
   };
+
+  const availableMechanisms = useMemo(
+    () => scores.map((s) => s.mechanismName),
+    [scores]
+  );
+
+  const filteredCollection = useMemo(() => {
+    if (selectedMechanisms.length === 0) return collection;
+    return collection.filter((game) => {
+      if (filterMode === "any") {
+        return selectedMechanisms.some((m) => game.mechanisms.includes(m));
+      }
+      return selectedMechanisms.every((m) => game.mechanisms.includes(m));
+    });
+  }, [collection, selectedMechanisms, filterMode]);
+
+  function handleChartClick(mechanismName: string, ctrlKey: boolean) {
+    if (ctrlKey) {
+      setSelectedMechanisms((prev) =>
+        prev.includes(mechanismName)
+          ? prev.filter((m) => m !== mechanismName)
+          : [...prev, mechanismName]
+      );
+    } else {
+      setSelectedMechanisms([mechanismName]);
+    }
+  }
 
   return (
     <div className="dashboard">
@@ -116,15 +146,49 @@ export function Dashboard() {
             {scoresLoading && <p>Loading scores...</p>}
             {scoresError && <p className="error">{scoresError}</p>}
 
-            {activeTab === "bar" && <MechanismBarChart scores={scores} mode={mode} />}
-            {activeTab === "radar" && <MechanismRadarChart scores={scores} />}
-            {activeTab === "scatter" && <MechanismScatterChart scores={scores} />}
+            {activeTab === "bar" && (
+              <MechanismBarChart
+                scores={scores}
+                mode={mode}
+                selectedMechanisms={selectedMechanisms}
+                onBarClick={handleChartClick}
+              />
+            )}
+            {activeTab === "radar" && (
+              <MechanismRadarChart
+                scores={scores}
+                selectedMechanisms={selectedMechanisms}
+                onSegmentClick={handleChartClick}
+              />
+            )}
+            {activeTab === "scatter" && (
+              <MechanismScatterChart
+                scores={scores}
+                selectedMechanisms={selectedMechanisms}
+                onPointClick={handleChartClick}
+              />
+            )}
+          </section>
+
+          <section className="filter-section">
+            <MechanismFilter
+              mechanisms={availableMechanisms}
+              selected={selectedMechanisms}
+              filterMode={filterMode}
+              onSelectionChange={setSelectedMechanisms}
+              onFilterModeChange={setFilterMode}
+            />
           </section>
 
           <section className="collection-section">
-            <h2>Your Rated Games ({collection.length})</h2>
+            <h2>
+              Your Rated Games
+              {selectedMechanisms.length > 0
+                ? ` (Showing ${filteredCollection.length} of ${collection.length})`
+                : ` (${collection.length})`}
+            </h2>
             {collectionLoading && <p>Loading collection...</p>}
-            {collection.length > 0 && (
+            {filteredCollection.length > 0 && (
               <table className="collection-table">
                 <thead>
                   <tr>
@@ -135,12 +199,21 @@ export function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {collection.map((game) => (
+                  {filteredCollection.map((game) => (
                     <tr key={game.id}>
                       <td>{game.name}</td>
                       <td>{game.yearPublished ?? "-"}</td>
                       <td className="rating">{game.userRating}</td>
-                      <td className="mechanisms">{game.mechanisms.join(", ")}</td>
+                      <td className="mechanisms">
+                        {game.mechanisms.map((m, i) => (
+                          <span key={m}>
+                            {i > 0 && ", "}
+                            <span className={selectedMechanisms.includes(m) ? "mechanism-highlight" : ""}>
+                              {m}
+                            </span>
+                          </span>
+                        ))}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -7,14 +7,17 @@ import {
   Tooltip,
   ResponsiveContainer,
   ZAxis,
+  Cell,
 } from "recharts";
 import type { MechanismScore } from "../../types";
 
 interface Props {
   scores: MechanismScore[];
+  selectedMechanisms?: string[];
+  onPointClick?: (mechanismName: string, ctrlKey: boolean) => void;
 }
 
-export function MechanismScatterChart({ scores }: Props) {
+export function MechanismScatterChart({ scores, selectedMechanisms = [], onPointClick }: Props) {
   const data = scores.map((s) => ({
     name: s.mechanismName,
     gameCount: s.gameCount,
@@ -42,15 +45,35 @@ export function MechanismScatterChart({ scores }: Props) {
           />
           <ZAxis type="number" dataKey="totalRating" range={[40, 400]} />
           <Tooltip
-            formatter={(value: number, name: string) => [
-              value.toFixed(2),
+            formatter={(value, name) => [
+              Number(value).toFixed(2),
               name === "gameCount" ? "Games" : "Avg Rating",
             ]}
-            labelFormatter={(_: unknown, payload: Array<{ payload?: { name: string } }>) =>
-              payload?.[0]?.payload?.name ?? ""
+            labelFormatter={(_label, payload) =>
+              (payload?.[0]?.payload as { name?: string } | undefined)?.name ?? ""
             }
           />
-          <Scatter data={data} fill="#6366f1" fillOpacity={0.7} />
+          <Scatter
+            data={data}
+            fill="#6366f1"
+            fillOpacity={0.7}
+            onClick={(point, _index, e) => {
+              const name = (point as unknown as { name: string }).name;
+              if (onPointClick && name) {
+                onPointClick(name, e.ctrlKey || e.metaKey);
+              }
+            }}
+            style={{ cursor: onPointClick ? "pointer" : undefined }}
+          >
+            {data.map((entry, index) => (
+              <Cell
+                key={index}
+                fill={selectedMechanisms.includes(entry.name) ? "#a5b4fc" : "#6366f1"}
+                stroke={selectedMechanisms.includes(entry.name) ? "#fff" : "none"}
+                strokeWidth={selectedMechanisms.includes(entry.name) ? 2 : 0}
+              />
+            ))}
+          </Scatter>
         </ScatterChart>
       </ResponsiveContainer>
     </div>

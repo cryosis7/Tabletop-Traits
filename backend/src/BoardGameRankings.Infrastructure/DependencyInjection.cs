@@ -13,21 +13,27 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string dataPath, IConfiguration configuration)
     {
         var bggBaseUrl = configuration["BggApi:BaseUrl"] ?? "https://boardgamegeek.com";
+        var bggBearerToken = configuration["BggApi:BearerToken"] ?? string.Empty;
 
         // Repositories
         services.AddSingleton<IBoardGameRepository>(new JsonBoardGameRepository(dataPath));
         services.AddSingleton<IUserRatingRepository>(new JsonUserRatingRepository(dataPath));
 
-        // BGG Client (HTML scraper)
-        services.AddHttpClient<BggHtmlClient>(client =>
+        // BGG Client (XML API v2)
+        services.AddHttpClient<BggXmlApiClient>(client =>
         {
             client.BaseAddress = new Uri(bggBaseUrl);
             client.DefaultRequestHeaders.Add("User-Agent", "BoardGameRankings/1.0");
+            if (!string.IsNullOrWhiteSpace(bggBearerToken))
+            {
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bggBearerToken);
+            }
         });
 
         services.AddScoped<IBggApiClient>(sp =>
             new CachingBggApiClient(
-                sp.GetRequiredService<BggHtmlClient>(),
+                sp.GetRequiredService<BggXmlApiClient>(),
                 sp.GetRequiredService<IBoardGameRepository>()));
 
         // Application Services

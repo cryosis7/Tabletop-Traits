@@ -6,24 +6,46 @@ This application fetches your rated games from BGG, extracts every mechanism tag
 
 ## Quick Start
 
-### Backend (.NET 9)
+### Script (recommended)
+
+```bash
+# Development (starts Seq, backend, and frontend dev server)
+./run.sh
+
+# Production (builds frontend, serves via preview + Production backend profile)
+./run.sh prod
+```
+
+| Service | Dev | Prod |
+|---------|-----|------|
+| Backend | http://localhost:5237 | http://localhost:5237 |
+| Frontend | http://localhost:5173 | http://localhost:4173 |
+| Seq logs | http://localhost:8081 | - |
+
+Press `Ctrl+C` to stop all services.
+
+### Manual
+
+**Backend**
 
 ```bash
 cd backend
+docker compose up -d          # optional: Seq log viewer
 dotnet run --project src/BoardGameRankings.Api
+# or for production:
+dotnet run --project src/BoardGameRankings.Api --launch-profile Production
 ```
 
-The API starts at `http://localhost:5237`.
-
-### Frontend (React + Vite)
+**Frontend**
 
 ```bash
 cd frontend
 npm install
-npm run dev
-```
 
-The UI starts at `http://localhost:5173`.
+npm run dev       # development server at http://localhost:5173
+# or for production:
+npm run build && npm run preview   # preview at http://localhost:4173
+```
 
 ## How It Works
 

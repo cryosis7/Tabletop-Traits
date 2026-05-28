@@ -15,6 +15,8 @@ interface Props {
   scores: MechanismScore[];
   mode: ScoringMode;
   maxItems?: number;
+  selectedMechanisms?: string[];
+  onBarClick?: (mechanismName: string, ctrlKey: boolean) => void;
 }
 
 function getRatingColor(value: number, max: number): string {
@@ -26,7 +28,7 @@ function getRatingColor(value: number, max: number): string {
   return "#ef4444";
 }
 
-export function MechanismBarChart({ scores, mode, maxItems = 20 }: Props) {
+export function MechanismBarChart({ scores, mode, maxItems = 20, selectedMechanisms = [], onBarClick }: Props) {
   const data = scores.slice(0, maxItems).map((s) => ({
     name: s.mechanismName,
     value: mode === "average" ? s.averageRating : s.totalRating,
@@ -43,14 +45,29 @@ export function MechanismBarChart({ scores, mode, maxItems = 20 }: Props) {
           <XAxis type="number" domain={[0, "auto"]} />
           <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 12 }} />
           <Tooltip
-            formatter={(value: number, _name: string, props: { payload: { gameCount: number } }) => [
-              `${value.toFixed(2)} (${props.payload.gameCount} games)`,
+            formatter={(value, _name, props) => [
+              `${Number(value).toFixed(2)} (${(props.payload as { gameCount: number }).gameCount} games)`,
               mode === "average" ? "Avg Rating" : "Total Rating",
             ]}
           />
-          <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+          <Bar
+            dataKey="value"
+            radius={[0, 4, 4, 0]}
+            onClick={(_data, _index, e) => {
+              const entry = _data as { name: string };
+              if (onBarClick && entry.name) {
+                onBarClick(entry.name, e.ctrlKey || e.metaKey);
+              }
+            }}
+            style={{ cursor: onBarClick ? "pointer" : undefined }}
+          >
             {data.map((entry, index) => (
-              <Cell key={index} fill={getRatingColor(entry.value, maxValue)} />
+              <Cell
+                key={index}
+                fill={getRatingColor(entry.value, maxValue)}
+                stroke={selectedMechanisms.includes(entry.name) ? "#fff" : "none"}
+                strokeWidth={selectedMechanisms.includes(entry.name) ? 2 : 0}
+              />
             ))}
           </Bar>
         </BarChart>
