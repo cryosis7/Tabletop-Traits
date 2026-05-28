@@ -78,6 +78,28 @@ This guide covers how to write and maintain end-to-end tests for the React front
 - Assert the outcome that proves the behavior, then stop.
 - When checking lists or tables, validate a few representative rows or counts instead of every rendered cell unless the full output is the feature.
 
+## Test File Structure
+
+Organize specs by **feature area**, one spec file per cohesive user workflow. This keeps files focused, makes it easy to locate tests related to a change, and allows parallel execution at the file level.
+
+| File | Scope |
+|------|-------|
+| `sync.spec.ts` | Sync flow: happy path, button states, loading, errors |
+| `scoring-modes.spec.ts` | Toggling between average and cumulative modes |
+| `chart-tabs.spec.ts` | Switching chart types (bar, radar, scatter) |
+| `mechanism-filter.spec.ts` | Filter search, chip selection, ANY/ALL toggle, clear, chart-click integration |
+| `collection-table.spec.ts` | Table content, sort order, mechanism display, highlighting |
+| `mechanism-tooltips.spec.ts` | Hover tooltips on mechanisms in the table, filter, and charts |
+
+**Shared helpers** live in a `helpers.ts` file alongside the specs. Extract common flows (e.g., `syncCollection`) there to reduce duplication without hiding intent.
+
+### Guidelines
+
+- One `test.describe` per file, named after the feature.
+- If a feature grows beyond ~8 tests, consider splitting into sub-features in separate files.
+- Do not put unrelated scenarios in the same file just because they share setup.
+- Prefer creating a new focused spec over appending to a catch-all file.
+
 ## What To Avoid
 
 - Do not use `waitForTimeout` except as a temporary debugging aid.
@@ -92,6 +114,8 @@ This guide covers how to write and maintain end-to-end tests for the React front
 - Validation for empty or invalid usernames.
 - Error handling when sync or analysis fails.
 - Switching chart tabs and scoring modes.
+- Mechanism filter interactions and table filtering.
+- Chart-to-filter click interactions.
 - Collection table rendering for known fixture games and mechanisms.
 - Any regression-prone flow that depends on backend fixture data.
 

@@ -1,14 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
-
-const fixtureUsername = "testuser";
-
-async function syncCollection(page: Page): Promise<void> {
-  await page.getByPlaceholder("Enter your BGG username").fill(fixtureUsername);
-  await page.getByRole("button", { name: "Sync & Analyze" }).click();
-
-  await expect(page.getByRole("status")).toContainText(/Synced \d+ games from BGG/);
-  await expect(page.getByRole("table")).toBeVisible();
-}
+import { test, expect } from "@playwright/test";
+import { syncCollection } from "./helpers";
 
 test.describe("Mechanism Tooltips", () => {
   test.beforeEach(async ({ page }) => {

@@ -61,6 +61,8 @@ React 19 single-page application (TypeScript, Vite) that displays board game col
 
 ## Testing
 
+Every user-facing feature must have corresponding Playwright e2e test coverage. When introducing a new feature or modifying existing behavior, add or update e2e tests in the same change.
+
 ### E2E Tests (Playwright)
 
 E2E tests exist in `e2e/` and cover user-visible flows against the real backend with fixture data. See `e2e/AGENTS.md` for detailed conventions.
