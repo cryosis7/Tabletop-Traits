@@ -9,15 +9,17 @@ import {
   ZAxis,
   Cell,
 } from "recharts";
-import type { MechanismScore } from "../../types";
+import type { MechanismScore, ScoringMode } from "../../types";
 
 interface Props {
   scores: MechanismScore[];
+  mode: ScoringMode;
   selectedMechanisms?: string[];
   onPointClick?: (mechanismName: string, ctrlKey: boolean) => void;
+  descriptions?: Map<string, string>;
 }
 
-export function MechanismScatterChart({ scores, selectedMechanisms = [], onPointClick }: Props) {
+export function MechanismScatterChart({ scores, mode, selectedMechanisms = [], onPointClick, descriptions }: Props) {
   const data = scores.map((s) => ({
     name: s.mechanismName,
     gameCount: s.gameCount,
@@ -45,13 +47,20 @@ export function MechanismScatterChart({ scores, selectedMechanisms = [], onPoint
           />
           <ZAxis type="number" dataKey="totalRating" range={[40, 400]} />
           <Tooltip
-            formatter={(value, name) => [
-              Number(value).toFixed(2),
-              name === "gameCount" ? "Games" : "Avg Rating",
-            ]}
-            labelFormatter={(_label, payload) =>
-              (payload?.[0]?.payload as { name?: string } | undefined)?.name ?? ""
-            }
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const entry = payload[0].payload as { name: string; gameCount: number; averageRating: number; totalRating: number };
+              const desc = descriptions?.get(entry.name);
+              return (
+                <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px", maxWidth: 300 }}>
+                  <strong style={{ color: "#a5b4fc" }}>{entry.name}</strong>
+                  {desc && <p style={{ margin: "4px 0 6px", fontSize: "0.8rem", opacity: 0.85 }}>{desc}</p>}
+                  <p style={{ margin: 0, fontSize: "0.85rem" }}>
+                    {mode === "average" ? "Avg Rating" : "Total Rating"}: {(mode === "average" ? entry.averageRating : entry.totalRating).toFixed(2)} ({entry.gameCount} games)
+                  </p>
+                </div>
+              );
+            }}
           />
           <Scatter
             data={data}

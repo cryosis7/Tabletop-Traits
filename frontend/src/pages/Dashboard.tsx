@@ -161,15 +161,19 @@ export function Dashboard() {
             {activeTab === "radar" && (
               <MechanismRadarChart
                 scores={scores}
+                mode={mode}
                 selectedMechanisms={selectedMechanisms}
                 onSegmentClick={handleChartClick}
+                descriptions={descriptions}
               />
             )}
             {activeTab === "scatter" && (
               <MechanismScatterChart
                 scores={scores}
+                mode={mode}
                 selectedMechanisms={selectedMechanisms}
                 onPointClick={handleChartClick}
+                descriptions={descriptions}
               />
             )}
           </section>

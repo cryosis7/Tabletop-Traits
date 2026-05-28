@@ -106,5 +106,100 @@ test.describe("Mechanism Tooltips", () => {
       // The custom tooltip content includes a mechanism description (non-empty paragraph)
       await expect(rechartsTooltip.locator("p").first()).not.toBeEmpty();
     });
+
+    test("bar chart tooltip shows Total Rating label in cumulative mode", async ({ page }) => {
+      const chartSection = page.locator(".chart-section");
+      await expect(chartSection).toBeVisible();
+
+      // Switch to cumulative mode
+      await page.getByRole("button", { name: "Cumulative" }).click();
+
+      const bars = chartSection.locator(".recharts-bar-rectangle");
+      await expect(bars.first()).toBeVisible();
+      await bars.first().hover();
+
+      const rechartsTooltip = chartSection.locator(".recharts-tooltip-wrapper");
+      await expect(rechartsTooltip).toBeVisible();
+      await expect(rechartsTooltip).toContainText("Total Rating");
+    });
+
+    test("radar chart tooltip includes mechanism description when hovering", async ({
+      page,
+    }) => {
+      const chartSection = page.locator(".chart-section");
+      await expect(chartSection).toBeVisible();
+
+      // Switch to radar chart
+      await page.getByRole("button", { name: "Radar" }).click();
+
+      // Hover on a radar data point
+      const radarPoints = chartSection.locator(".recharts-radar-dot");
+      await expect(radarPoints.first()).toBeVisible();
+      await radarPoints.first().hover();
+
+      const rechartsTooltip = chartSection.locator(".recharts-tooltip-wrapper");
+      await expect(rechartsTooltip).toBeVisible();
+      // The custom tooltip should include a description paragraph
+      await expect(rechartsTooltip.locator("p").first()).not.toBeEmpty();
+    });
+
+    test("radar chart tooltip shows Total Rating label in cumulative mode", async ({
+      page,
+    }) => {
+      const chartSection = page.locator(".chart-section");
+      await expect(chartSection).toBeVisible();
+
+      // Switch to cumulative mode then radar chart
+      await page.getByRole("button", { name: "Cumulative" }).click();
+      await page.getByRole("button", { name: "Radar" }).click();
+
+      const radarPoints = chartSection.locator(".recharts-radar-dot");
+      await expect(radarPoints.first()).toBeVisible();
+      await radarPoints.first().hover();
+
+      const rechartsTooltip = chartSection.locator(".recharts-tooltip-wrapper");
+      await expect(rechartsTooltip).toBeVisible();
+      await expect(rechartsTooltip).toContainText("Total Rating");
+    });
+
+    test("scatter chart tooltip includes mechanism description when hovering", async ({
+      page,
+    }) => {
+      const chartSection = page.locator(".chart-section");
+      await expect(chartSection).toBeVisible();
+
+      // Switch to scatter chart
+      await page.getByRole("button", { name: "Scatter" }).click();
+
+      // Wait for scatter chart animation to complete before interacting
+      const scatterPoints = chartSection.locator(".recharts-symbols");
+      await expect(scatterPoints.first()).toBeVisible();
+      await page.waitForTimeout(600);
+      await scatterPoints.first().hover({ force: true });
+
+      const rechartsTooltip = chartSection.locator(".recharts-tooltip-wrapper");
+      await expect(rechartsTooltip).toBeVisible();
+      // The custom tooltip should include a description paragraph
+      await expect(rechartsTooltip.locator("p").first()).not.toBeEmpty();
+    });
+
+    test("scatter chart tooltip shows Total Rating label in cumulative mode", async ({
+      page,
+    }) => {
+      const chartSection = page.locator(".chart-section");
+      await expect(chartSection).toBeVisible();
+
+      // Switch to cumulative mode then scatter chart
+      await page.getByRole("button", { name: "Cumulative" }).click();
+      await page.getByRole("button", { name: "Scatter" }).click();
+
+      const scatterPoints = chartSection.locator(".recharts-symbols");
+      await expect(scatterPoints.first()).toBeVisible();
+      await scatterPoints.first().hover();
+
+      const rechartsTooltip = chartSection.locator(".recharts-tooltip-wrapper");
+      await expect(rechartsTooltip).toBeVisible();
+      await expect(rechartsTooltip).toContainText("Total Rating");
+    });
   });
 });

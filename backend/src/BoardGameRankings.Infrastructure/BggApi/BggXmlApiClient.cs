@@ -31,10 +31,11 @@ public class BggXmlApiClient(HttpClient httpClient) : IBggApiClient
 
         foreach (var batch in ids.Chunk(MaxIdsPerRequest))
         {
+            var batchIds = new HashSet<int>(batch);
             var idsParam = string.Join(",", batch);
             var url = $"/xmlapi2/thing?id={idsParam}&type=boardgame";
             var xml = await GetXmlWithRetryAsync(url, cancellationToken);
-            games.AddRange(ParseThingXml(xml));
+            games.AddRange(ParseThingXml(xml).Where(g => batchIds.Contains(g.Id)));
         }
 
         return games;
