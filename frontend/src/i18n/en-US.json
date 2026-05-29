@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "Board Game Mechanism Analyzer",
-    "subtitle": "Discover which board game mechanisms you love (and hate) based on your BGG ratings."
+    "subtitle": "Discover which board game mechanisms you love (and hate) based on your BGG ratings.",
+    "poweredByBGG": "Powered by BoardGameGeek"
   },
   "sync": {
     "placeholder": "Enter your BGG username",
@@ -20,7 +21,9 @@
     "all": "All",
     "bottom20": "Bottom 20",
     "loadingScores": "Loading scores...",
-    "sectionLabel": "Mechanism analysis"
+    "sectionLabel": "Mechanism analysis",
+    "games": "Games",
+    "numberOfGames": "Number of Games"
   },
   "collection": {
     "title": "Your Rated Games",

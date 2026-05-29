@@ -9,6 +9,7 @@ import {
   ZAxis,
   Cell,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import type { MechanismScore, ScoringMode } from "../../types";
 import { SCORING_MODES } from "../../types";
 
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function MechanismScatterChart({ scores, mode, selectedMechanisms = [], onPointClick, descriptions }: Props) {
+  const { t } = useTranslation();
   const config = SCORING_MODES.find((m) => m.key === mode)!;
   const yDomain: [number, number] = mode === "positiveRate" ? [0, 100] : [0, 10];
   const data = scores.map((s) => ({
@@ -37,8 +39,8 @@ export function MechanismScatterChart({ scores, mode, selectedMechanisms = [], o
           <XAxis
             type="number"
             dataKey="gameCount"
-            name="Games"
-            label={{ value: "Number of Games", position: "bottom", offset: 0 }}
+            name={t("charts.games")}
+            label={{ value: t("charts.numberOfGames"), position: "bottom", offset: 0 }}
           />
           <YAxis
             type="number"

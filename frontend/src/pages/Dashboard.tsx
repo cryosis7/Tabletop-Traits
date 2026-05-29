@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useSync, useMechanismScores, useCollection, useMechanismDescriptions } from "../hooks/useApi";
 import { SyncPanel } from "../components/SyncPanel";
 import { ChartPanel } from "../components/ChartPanel";
@@ -8,6 +9,7 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import type { FilterMode } from "../types";
 
 export function Dashboard() {
+  const { t } = useTranslation();
   const [selectedMechanisms, setSelectedMechanisms] = useState<string[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>("any");
 
@@ -45,8 +47,8 @@ export function Dashboard() {
   return (
     <div className="dashboard">
       <header className="header">
-        <h1>Board Game Mechanism Analyzer</h1>
-        <p>Discover which board game mechanisms you love (and hate) based on your BGG ratings.</p>
+        <h1>{t("app.title")}</h1>
+        <p>{t("app.subtitle")}</p>
       </header>
 
       <SyncPanel

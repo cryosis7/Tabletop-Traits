@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { MechanismTooltip } from "./MechanismTooltip";
 import type { BoardGame, FilterMode } from "../types";
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function CollectionTable({ collection, selectedMechanisms, filterMode, descriptions }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const filteredCollection = useMemo(() => {
     if (selectedMechanisms.length === 0) return collection;
     return collection.filter((game) => {
@@ -23,19 +25,19 @@ export function CollectionTable({ collection, selectedMechanisms, filterMode, de
   return (
     <section className="collection-section">
       <h2>
-        Your Rated Games
+        {t("collection.title")}
         {selectedMechanisms.length > 0
-          ? ` (Showing ${filteredCollection.length} of ${collection.length})`
+          ? ` (${t("collection.showing", { filtered: filteredCollection.length, total: collection.length })})`
           : ` (${collection.length})`}
       </h2>
       {filteredCollection.length > 0 && (
         <table className="collection-table">
           <thead>
             <tr>
-              <th>Game</th>
-              <th>Year</th>
-              <th>Your Rating</th>
-              <th>Mechanisms</th>
+              <th>{t("collection.game")}</th>
+              <th>{t("collection.year")}</th>
+              <th>{t("collection.yourRating")}</th>
+              <th>{t("collection.mechanisms")}</th>
             </tr>
           </thead>
           <tbody>

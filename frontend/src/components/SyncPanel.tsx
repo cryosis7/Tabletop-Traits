@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { SyncStatus } from "../types";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function SyncPanel({ onSync, syncing, syncStatus, syncError, loading }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [username, setUsername] = useState("");
 
   const handleSync = () => {
@@ -22,7 +24,7 @@ export function SyncPanel({ onSync, syncing, syncStatus, syncError, loading }: P
       <div className="input-group">
         <input
           type="text"
-          placeholder="Enter your BGG username"
+          placeholder={t("sync.placeholder")}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSync()}
@@ -30,15 +32,15 @@ export function SyncPanel({ onSync, syncing, syncStatus, syncError, loading }: P
           autoComplete="username"
         />
         <button onClick={handleSync} disabled={syncing || !username.trim()}>
-          {syncing ? "Syncing..." : "Sync & Analyze"}
+          {syncing ? t("sync.syncing") : t("sync.button")}
         </button>
       </div>
 
       {syncError && <p className="error">{syncError}</p>}
       {syncStatus && !syncing && !loading && (
         <p className="sync-info" role="status" aria-live="polite">
-          Synced {syncStatus.gamesProcessed} games from BGG
-          {syncStatus.lastSyncTime && ` at ${new Date(syncStatus.lastSyncTime).toLocaleTimeString()}`}
+          {t("sync.syncedGames", { count: syncStatus.gamesProcessed })}
+          {syncStatus.lastSyncTime && t("sync.syncedAt", { time: new Date(syncStatus.lastSyncTime).toLocaleTimeString() })}
         </p>
       )}
     </section>

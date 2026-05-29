@@ -48,7 +48,7 @@ test.describe("Sync flow", () => {
 
   test("disables sync button while syncing", async ({ page }) => {
     const input = page.getByPlaceholder("Enter your BGG username");
-    const syncBtn = page.getByRole("button", { name: /Sync/ });
+    const syncBtn = page.getByRole("button", { name: "Analyze" });
 
     await expect(syncBtn).toBeDisabled();
 
@@ -62,8 +62,9 @@ test.describe("Sync flow", () => {
     });
 
     await syncBtn.click();
-    await expect(syncBtn).toBeDisabled();
-    await expect(syncBtn).toHaveText("Syncing...");
+    const syncingBtn = page.getByRole("button", { name: "Syncing..." });
+    await expect(syncingBtn).toBeDisabled();
+    await expect(syncingBtn).toHaveText("Syncing...");
     await expect(page.getByRole("status")).toContainText(
       `Synced ${fixtureGameCount} games from BGG`
     );
@@ -71,7 +72,7 @@ test.describe("Sync flow", () => {
 
   test("keeps sync button disabled when username is empty or whitespace", async ({ page }) => {
     const input = page.getByPlaceholder("Enter your BGG username");
-    const syncBtn = page.getByRole("button", { name: /Sync/ });
+    const syncBtn = page.getByRole("button", { name: "Analyze" });
 
     await expect(syncBtn).toBeDisabled();
 
@@ -102,7 +103,7 @@ test.describe("Sync flow", () => {
     );
 
     await page.getByPlaceholder("Enter your BGG username").fill("baduser");
-    await page.getByRole("button", { name: "Sync & Analyze" }).click();
+    await page.getByRole("button", { name: "Analyze" }).click();
 
     await expect(page.locator(".error")).toBeVisible();
   });

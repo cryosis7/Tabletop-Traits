@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { MechanismBarChart } from "./charts/MechanismBarChart";
 import { MechanismRadarChart } from "./charts/MechanismRadarChart";
 import { MechanismScatterChart } from "./charts/MechanismScatterChart";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function ChartPanel({ scores, selectedMechanisms, onBarClick, descriptions }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<ScoringMode>("arithmetic");
   const [activeTab, setActiveTab] = useState<"bar" | "radar" | "scatter">("bar");
   const [countMode, setCountMode] = useState<MechanismCountMode>("top20");
@@ -43,7 +45,7 @@ export function ChartPanel({ scores, selectedMechanisms, onBarClick, description
             className={activeTab === "bar" ? "active" : ""}
             onClick={() => setActiveTab("bar")}
           >
-            Bar Chart
+            {t("charts.bar")}
           </button>
           <button
             type="button"
@@ -51,7 +53,7 @@ export function ChartPanel({ scores, selectedMechanisms, onBarClick, description
             className={activeTab === "radar" ? "active" : ""}
             onClick={() => setActiveTab("radar")}
           >
-            Radar
+            {t("charts.radar")}
           </button>
           <button
             type="button"
@@ -59,12 +61,12 @@ export function ChartPanel({ scores, selectedMechanisms, onBarClick, description
             className={activeTab === "scatter" ? "active" : ""}
             onClick={() => setActiveTab("scatter")}
           >
-            Scatter
+            {t("charts.scatter")}
           </button>
         </div>
       </section>
 
-      <section className="chart-section" aria-label="Mechanism analysis">
+      <section className="chart-section" aria-label={t("charts.sectionLabel")}>
         <div className="chart-header">
           <div className="count-toggle">
             <button
@@ -73,7 +75,7 @@ export function ChartPanel({ scores, selectedMechanisms, onBarClick, description
               className={countMode === "top20" ? "active" : ""}
               onClick={() => setCountMode("top20")}
             >
-              Top 20
+              {t("charts.top20")}
             </button>
             <button
               type="button"
@@ -81,7 +83,7 @@ export function ChartPanel({ scores, selectedMechanisms, onBarClick, description
               className={countMode === "all" ? "active" : ""}
               onClick={() => setCountMode("all")}
             >
-              All
+              {t("charts.all")}
             </button>
             <button
               type="button"
@@ -89,7 +91,7 @@ export function ChartPanel({ scores, selectedMechanisms, onBarClick, description
               className={countMode === "bottom20" ? "active" : ""}
               onClick={() => setCountMode("bottom20")}
             >
-              Bottom 20
+              {t("charts.bottom20")}
             </button>
           </div>
         </div>

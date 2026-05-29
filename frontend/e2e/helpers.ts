@@ -14,7 +14,7 @@ export async function syncCollection(
   expectedGameCount: number = fixtureGameCount
 ): Promise<void> {
   await page.getByPlaceholder("Enter your BGG username").fill(username);
-  await page.getByRole("button", { name: "Sync & Analyze" }).click();
+  await page.getByRole("button", { name: "Analyze" }).click();
 
   await expect(page.getByRole("status")).toContainText(`Synced ${expectedGameCount} games from BGG`);
   await expect(page.getByRole("region", { name: "Mechanism analysis" })).toBeVisible();
