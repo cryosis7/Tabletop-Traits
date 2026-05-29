@@ -7,47 +7,74 @@ test.describe("Scoring modes", () => {
     await syncCollection(page);
   });
 
-  test("defaults to average scoring mode", async ({ page }) => {
-    const averageBtn = page.getByRole("button", { name: "Average Rating" });
-    const cumulativeBtn = page.getByRole("button", { name: "Cumulative" });
-
-    await expect(averageBtn).toHaveAttribute("aria-pressed", "true");
-    await expect(cumulativeBtn).toHaveAttribute("aria-pressed", "false");
+  test("defaults to arithmetic scoring mode", async ({ page }) => {
+    const trigger = page.locator("#scoring-mode-select");
+    await expect(trigger).toContainText("Arithmetic Mean");
   });
 
-  test("switches scoring mode between average and cumulative", async ({ page }) => {
-    const averageBtn = page.getByRole("button", { name: "Average Rating" });
-    const cumulativeBtn = page.getByRole("button", { name: "Cumulative" });
+  test("switches scoring mode via dropdown", async ({ page }) => {
+    const trigger = page.locator("#scoring-mode-select");
 
-    await cumulativeBtn.click();
-    await expect(cumulativeBtn).toHaveAttribute("aria-pressed", "true");
-    await expect(averageBtn).toHaveAttribute("aria-pressed", "false");
+    await trigger.click();
+    await page.locator(".mode-dropdown-item", { hasText: "Bayesian Average" }).click();
+    await expect(trigger).toContainText("Bayesian Average");
 
-    await averageBtn.click();
-    await expect(averageBtn).toHaveAttribute("aria-pressed", "true");
-    await expect(cumulativeBtn).toHaveAttribute("aria-pressed", "false");
+    await trigger.click();
+    await page.locator(".mode-dropdown-item", { hasText: "Median" }).click();
+    await expect(trigger).toContainText("Median");
+
+    await trigger.click();
+    await page.locator(".mode-dropdown-item", { hasText: "Arithmetic Mean" }).click();
+    await expect(trigger).toContainText("Arithmetic Mean");
   });
 
-  test("cumulative mode changes the chart axis values", async ({ page }) => {
+  test("shows tooltip with mode description on info icon hover", async ({ page }) => {
+    const trigger = page.locator("#scoring-mode-select");
+    await trigger.click();
+
+    const dropdown = page.locator(".mode-dropdown");
+    await expect(dropdown).toBeVisible();
+    await expect(dropdown).toContainText("Simple average");
+  });
+
+  test("switching mode changes the chart values", async ({ page }) => {
     const chartSection = page.locator(".chart-section");
 
-    // In average mode, capture the Y axis tick values
+    // In arithmetic mode, capture the Y axis tick values
     await expect(chartSection.locator(".recharts-cartesian-axis-tick-value").first()).toBeVisible();
-    const avgTicks = await chartSection
+    const arithmeticTicks = await chartSection
       .locator(".recharts-cartesian-axis-tick-value")
       .allTextContents();
-    const avgMax = Math.max(...avgTicks.map(Number).filter((n) => !isNaN(n)));
+    const arithmeticValues = arithmeticTicks.map(Number).filter((n) => !isNaN(n));
 
-    await page.getByRole("button", { name: "Cumulative" }).click();
+    // Switch to positive rate - values should be 0-100 range
+    const trigger = page.locator("#scoring-mode-select");
+    await trigger.click();
+    await page.locator(".mode-dropdown-item", { hasText: "Positive Rate" }).click();
 
-    // Wait for chart to re-render with new values
     await expect(chartSection.locator(".recharts-cartesian-axis-tick-value").first()).toBeVisible();
-    const cumTicks = await chartSection
+    const positiveRateTicks = await chartSection
       .locator(".recharts-cartesian-axis-tick-value")
       .allTextContents();
-    const cumMax = Math.max(...cumTicks.map(Number).filter((n) => !isNaN(n)));
+    const positiveRateValues = positiveRateTicks.map(Number).filter((n) => !isNaN(n));
 
-    // Cumulative totals should produce a higher max value than averages
-    expect(cumMax).toBeGreaterThan(avgMax);
+    // Positive rate values should differ from arithmetic values
+    expect(positiveRateValues).not.toEqual(arithmeticValues);
+  });
+
+  test("all scoring modes are available in the dropdown", async ({ page }) => {
+    const trigger = page.locator("#scoring-mode-select");
+    await trigger.click();
+
+    const items = page.locator(".mode-dropdown-item .mode-dropdown-label");
+    const labels = await items.allTextContents();
+
+    expect(labels).toContain("Arithmetic Mean");
+    expect(labels).toContain("Bayesian Average");
+    expect(labels).toContain("Median");
+    expect(labels).toContain("Trimmed Mean");
+    expect(labels).toContain("Confidence-Adjusted");
+    expect(labels).toContain("Positive Rate");
+    expect(labels).toHaveLength(6);
   });
 });

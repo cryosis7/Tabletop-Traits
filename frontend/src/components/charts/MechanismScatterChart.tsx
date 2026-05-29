@@ -10,6 +10,7 @@ import {
   Cell,
 } from "recharts";
 import type { MechanismScore, ScoringMode } from "../../types";
+import { SCORING_MODES } from "../../types";
 
 interface Props {
   scores: MechanismScore[];
@@ -20,11 +21,12 @@ interface Props {
 }
 
 export function MechanismScatterChart({ scores, mode, selectedMechanisms = [], onPointClick, descriptions }: Props) {
+  const config = SCORING_MODES.find((m) => m.key === mode)!;
+  const yDomain: [number, number] = mode === "positiveRate" ? [0, 100] : [0, 10];
   const data = scores.map((s) => ({
     name: s.mechanismName,
     gameCount: s.gameCount,
-    averageRating: s.averageRating,
-    totalRating: s.totalRating,
+    score: s[config.scoreKey] as number,
   }));
 
   return (
@@ -40,23 +42,23 @@ export function MechanismScatterChart({ scores, mode, selectedMechanisms = [], o
           />
           <YAxis
             type="number"
-            dataKey="averageRating"
-            name="Avg Rating"
-            domain={[0, 10]}
-            label={{ value: "Average Rating", angle: -90, position: "insideLeft" }}
+            dataKey="score"
+            name={config.label}
+            domain={yDomain}
+            label={{ value: config.label, angle: -90, position: "insideLeft" }}
           />
-          <ZAxis type="number" dataKey="totalRating" range={[40, 400]} />
+          <ZAxis type="number" dataKey="gameCount" range={[40, 400]} />
           <Tooltip
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
-              const entry = payload[0].payload as { name: string; gameCount: number; averageRating: number; totalRating: number };
+              const entry = payload[0].payload as { name: string; gameCount: number; score: number };
               const desc = descriptions?.get(entry.name);
               return (
                 <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px", maxWidth: 300 }}>
                   <strong style={{ color: "#a5b4fc" }}>{entry.name}</strong>
                   {desc && <p style={{ margin: "4px 0 6px", fontSize: "0.8rem", opacity: 0.85 }}>{desc}</p>}
                   <p style={{ margin: 0, fontSize: "0.85rem" }}>
-                    {mode === "average" ? "Avg Rating" : "Total Rating"}: {(mode === "average" ? entry.averageRating : entry.totalRating).toFixed(2)} ({entry.gameCount} games)
+                    {config.label}: {entry.score.toFixed(2)} ({entry.gameCount} games)
                   </p>
                 </div>
               );

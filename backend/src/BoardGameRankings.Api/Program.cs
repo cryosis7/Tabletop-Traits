@@ -35,12 +35,14 @@ builder.Services.AddOpenApi("v1", options =>
     });
 });
 
-// CORS for frontend dev server
+// CORS for frontend
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
+                     ?? ["http://localhost:5173"];
+        policy.WithOrigins(origins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

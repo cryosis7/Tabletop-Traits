@@ -8,8 +8,8 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import type { MechanismScore } from "../../types";
-import type { ScoringMode } from "../../types";
+import type { MechanismScore, ScoringMode } from "../../types";
+import { SCORING_MODES } from "../../types";
 
 interface Props {
   scores: MechanismScore[];
@@ -30,9 +30,10 @@ function getRatingColor(value: number, max: number): string {
 }
 
 export function MechanismBarChart({ scores, mode, maxItems = 20, selectedMechanisms = [], onBarClick, descriptions }: Props) {
+  const config = SCORING_MODES.find((m) => m.key === mode)!;
   const data = scores.slice(0, maxItems).map((s) => ({
     name: s.mechanismName,
-    value: mode === "average" ? s.averageRating : s.totalRating,
+    value: s[config.scoreKey] as number,
     gameCount: s.gameCount,
   }));
 
@@ -55,7 +56,7 @@ export function MechanismBarChart({ scores, mode, maxItems = 20, selectedMechani
                   <strong style={{ color: "#a5b4fc" }}>{data.name}</strong>
                   {desc && <p style={{ margin: "4px 0 6px", fontSize: "0.8rem", opacity: 0.85 }}>{desc}</p>}
                   <p style={{ margin: 0, fontSize: "0.85rem" }}>
-                    {mode === "average" ? "Avg Rating" : "Total Rating"}: {data.value.toFixed(2)} ({data.gameCount} games)
+                    {config.label}: {data.value.toFixed(2)} ({data.gameCount} games)
                   </p>
                 </div>
               );

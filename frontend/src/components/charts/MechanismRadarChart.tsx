@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from "recharts";
 import type { MechanismScore, ScoringMode } from "../../types";
+import { SCORING_MODES } from "../../types";
 
 interface Props {
   scores: MechanismScore[];
@@ -19,10 +20,12 @@ interface Props {
 }
 
 export function MechanismRadarChart({ scores, mode, maxItems = 10, selectedMechanisms = [], onSegmentClick, descriptions }: Props) {
+  const config = SCORING_MODES.find((m) => m.key === mode)!;
+  const maxDomain = mode === "positiveRate" ? 100 : 10;
   const data = scores.slice(0, maxItems).map((s) => ({
     mechanism: s.mechanismName,
-    rating: mode === "average" ? s.averageRating : s.totalRating,
-    fullMark: mode === "average" ? 10 : Math.max(...scores.slice(0, maxItems).map((x) => x.totalRating), 1),
+    rating: s[config.scoreKey] as number,
+    fullMark: maxDomain,
   }));
 
   return (
@@ -56,7 +59,7 @@ export function MechanismRadarChart({ scores, mode, maxItems = 10, selectedMecha
               );
             }}
           />
-          <PolarRadiusAxis domain={[0, 10]} tick={{ fontSize: 10 }} />
+          <PolarRadiusAxis domain={[0, maxDomain]} tick={{ fontSize: 10 }} />
           <Tooltip
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
@@ -67,7 +70,7 @@ export function MechanismRadarChart({ scores, mode, maxItems = 10, selectedMecha
                   <strong style={{ color: "#a5b4fc" }}>{entry.mechanism}</strong>
                   {desc && <p style={{ margin: "4px 0 6px", fontSize: "0.8rem", opacity: 0.85 }}>{desc}</p>}
                   <p style={{ margin: 0, fontSize: "0.85rem" }}>
-                    {mode === "average" ? "Avg Rating" : "Total Rating"}: {entry.rating.toFixed(2)}
+                    {config.label}: {entry.rating.toFixed(2)}
                   </p>
                 </div>
               );

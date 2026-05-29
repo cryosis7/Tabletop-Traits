@@ -12,7 +12,7 @@ export async function syncCollection(username: string): Promise<SyncStatus> {
 
 export async function getMechanismScores(
   username: string,
-  mode: ScoringMode = "average"
+  mode: ScoringMode = "arithmetic"
 ): Promise<MechanismScore[]> {
   const response = await api.get<MechanismScore[]>(
     `/analysis/${encodeURIComponent(username)}/mechanisms`,

@@ -359,3 +359,91 @@ button.active {
   margin-top: 2px;
   line-height: 1.3;
 }
+
+/* Scoring Mode Selector */
+.mode-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mode-selector-wrapper {
+  position: relative;
+  min-width: 200px;
+}
+
+.mode-selector-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.mode-selector-trigger:hover {
+  border-color: var(--primary);
+}
+
+.mode-selector-chevron {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+}
+
+.mode-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  list-style: none;
+  z-index: 20;
+  overflow: hidden;
+}
+
+.mode-dropdown-item {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.mode-dropdown-item:hover {
+  background: var(--primary);
+}
+
+.mode-dropdown-item:hover .mode-dropdown-description {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mode-dropdown-item.active {
+  background: var(--surface);
+}
+
+.mode-dropdown-item.active .mode-dropdown-label {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.mode-dropdown-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.mode-dropdown-description {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}

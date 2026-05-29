@@ -5,12 +5,13 @@ import { MechanismRadarChart } from "../components/charts/MechanismRadarChart";
 import { MechanismScatterChart } from "../components/charts/MechanismScatterChart";
 import { MechanismFilter } from "../components/MechanismFilter";
 import { MechanismTooltip } from "../components/MechanismTooltip";
+import { ScoringModeSelector } from "../components/ScoringModeSelector";
 import type { ScoringMode, FilterMode } from "../types";
+import { SCORING_MODES } from "../types";
 
 export function Dashboard() {
   const [username, setUsername] = useState("");
-  const [activeUser, setActiveUser] = useState("");
-  const [mode, setMode] = useState<ScoringMode>("average");
+  const [mode, setMode] = useState<ScoringMode>("arithmetic");
   const [activeTab, setActiveTab] = useState<"bar" | "radar" | "scatter">("bar");
   const [selectedMechanisms, setSelectedMechanisms] = useState<string[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>("any");
@@ -23,22 +24,25 @@ export function Dashboard() {
   const handleSync = async () => {
     if (!username.trim()) return;
     await sync(username.trim());
-    setActiveUser(username.trim());
-    await fetchScores(username.trim(), mode);
+    await fetchScores(username.trim());
     await fetchCollection(username.trim());
     await fetchDescriptions();
   };
 
-  const handleModeChange = async (newMode: ScoringMode) => {
+  const handleModeChange = (newMode: ScoringMode) => {
     setMode(newMode);
-    if (activeUser) {
-      await fetchScores(activeUser, newMode);
-    }
   };
 
+  const scoreKey = SCORING_MODES.find((m) => m.key === mode)!.scoreKey;
+
+  const sortedScores = useMemo(
+    () => [...scores].sort((a, b) => (b[scoreKey] as number) - (a[scoreKey] as number)),
+    [scores, scoreKey]
+  );
+
   const availableMechanisms = useMemo(
-    () => scores.map((s) => s.mechanismName),
-    [scores]
+    () => sortedScores.map((s) => s.mechanismName),
+    [sortedScores]
   );
 
   const filteredCollection = useMemo(() => {
@@ -97,25 +101,7 @@ export function Dashboard() {
       {scores.length > 0 && (
         <>
           <section className="controls">
-            <div className="mode-toggle">
-              <label>Scoring Mode:</label>
-              <button
-                type="button"
-                aria-pressed={mode === "average"}
-                className={mode === "average" ? "active" : ""}
-                onClick={() => handleModeChange("average")}
-              >
-                Average Rating
-              </button>
-              <button
-                type="button"
-                aria-pressed={mode === "cumulative"}
-                className={mode === "cumulative" ? "active" : ""}
-                onClick={() => handleModeChange("cumulative")}
-              >
-                Cumulative
-              </button>
-            </div>
+            <ScoringModeSelector mode={mode} onModeChange={handleModeChange} />
 
             <div className="tab-toggle">
               <button
@@ -151,7 +137,7 @@ export function Dashboard() {
 
             {activeTab === "bar" && (
               <MechanismBarChart
-                scores={scores}
+                scores={sortedScores}
                 mode={mode}
                 selectedMechanisms={selectedMechanisms}
                 onBarClick={handleChartClick}
@@ -160,7 +146,7 @@ export function Dashboard() {
             )}
             {activeTab === "radar" && (
               <MechanismRadarChart
-                scores={scores}
+                scores={sortedScores}
                 mode={mode}
                 selectedMechanisms={selectedMechanisms}
                 onSegmentClick={handleChartClick}
@@ -169,7 +155,7 @@ export function Dashboard() {
             )}
             {activeTab === "scatter" && (
               <MechanismScatterChart
-                scores={scores}
+                scores={sortedScores}
                 mode={mode}
                 selectedMechanisms={selectedMechanisms}
                 onPointClick={handleChartClick}

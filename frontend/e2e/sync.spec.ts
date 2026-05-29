@@ -21,10 +21,7 @@ test.describe("Sync flow", () => {
 
     await syncCollection(page);
 
-    await expect(page.getByRole("button", { name: "Average Rating" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    await expect(page.locator("#scoring-mode-select")).toContainText("Arithmetic Mean");
     await expect(page.getByRole("button", { name: "Bar Chart" })).toHaveAttribute(
       "aria-pressed",
       "true"

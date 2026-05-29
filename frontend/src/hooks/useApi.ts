@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { MechanismScore, BoardGame, SyncStatus, ScoringMode } from "../types";
+import type { MechanismScore, BoardGame, SyncStatus } from "../types";
 import * as api from "../services/api";
 
 export function useSync() {
@@ -29,11 +29,11 @@ export function useMechanismScores() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchScores = useCallback(async (username: string, mode: ScoringMode) => {
+  const fetchScores = useCallback(async (username: string) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.getMechanismScores(username, mode);
+      const data = await api.getMechanismScores(username);
       setScores(data);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to load scores";

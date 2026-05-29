@@ -98,12 +98,13 @@ test.describe("Mechanism Tooltips", () => {
       await expect(rechartsTooltip.locator("p").first()).not.toBeEmpty();
     });
 
-    test("bar chart tooltip shows Total Rating label in cumulative mode", async ({ page }) => {
+    test("bar chart tooltip shows correct label when scoring mode changes", async ({ page }) => {
       const chartSection = page.locator(".chart-section");
       await expect(chartSection).toBeVisible();
 
-      // Switch to cumulative mode
-      await page.getByRole("button", { name: "Cumulative" }).click();
+      // Switch to Positive Rate mode
+      await page.locator("#scoring-mode-select").click();
+      await page.locator(".mode-dropdown-item", { hasText: "Positive Rate" }).click();
 
       const bars = chartSection.locator(".recharts-bar-rectangle");
       await expect(bars.first()).toBeVisible();
@@ -111,7 +112,7 @@ test.describe("Mechanism Tooltips", () => {
 
       const rechartsTooltip = chartSection.locator(".recharts-tooltip-wrapper");
       await expect(rechartsTooltip).toBeVisible();
-      await expect(rechartsTooltip).toContainText("Total Rating");
+      await expect(rechartsTooltip).toContainText("Positive Rate");
     });
 
     test("radar chart tooltip includes mechanism description when hovering", async ({
@@ -134,14 +135,15 @@ test.describe("Mechanism Tooltips", () => {
       await expect(rechartsTooltip.locator("p").first()).not.toBeEmpty();
     });
 
-    test("radar chart tooltip shows Total Rating label in cumulative mode", async ({
+    test("radar chart tooltip shows correct label when scoring mode changes", async ({
       page,
     }) => {
       const chartSection = page.locator(".chart-section");
       await expect(chartSection).toBeVisible();
 
-      // Switch to cumulative mode then radar chart
-      await page.getByRole("button", { name: "Cumulative" }).click();
+      // Switch to Bayesian Average mode then radar chart
+      await page.locator("#scoring-mode-select").click();
+      await page.locator(".mode-dropdown-item", { hasText: "Bayesian Average" }).click();
       await page.getByRole("button", { name: "Radar" }).click();
 
       const radarPoints = chartSection.locator(".recharts-radar-dot");
@@ -150,7 +152,7 @@ test.describe("Mechanism Tooltips", () => {
 
       const rechartsTooltip = chartSection.locator(".recharts-tooltip-wrapper");
       await expect(rechartsTooltip).toBeVisible();
-      await expect(rechartsTooltip).toContainText("Total Rating");
+      await expect(rechartsTooltip).toContainText("Bayesian Average");
     });
 
     test("scatter chart tooltip includes mechanism description when hovering", async ({
@@ -174,23 +176,25 @@ test.describe("Mechanism Tooltips", () => {
       await expect(rechartsTooltip.locator("p").first()).not.toBeEmpty();
     });
 
-    test("scatter chart tooltip shows Total Rating label in cumulative mode", async ({
+    test("scatter chart tooltip shows correct label when scoring mode changes", async ({
       page,
     }) => {
       const chartSection = page.locator(".chart-section");
       await expect(chartSection).toBeVisible();
 
-      // Switch to cumulative mode then scatter chart
-      await page.getByRole("button", { name: "Cumulative" }).click();
+      // Switch to Median mode then scatter chart
+      await page.locator("#scoring-mode-select").click();
+      await page.locator(".mode-dropdown-item", { hasText: "Median" }).click();
       await page.getByRole("button", { name: "Scatter" }).click();
 
       const scatterPoints = chartSection.locator(".recharts-symbols");
       await expect(scatterPoints.first()).toBeVisible();
-      await scatterPoints.first().hover();
+      await page.waitForTimeout(600);
+      await scatterPoints.first().hover({ force: true });
 
       const rechartsTooltip = chartSection.locator(".recharts-tooltip-wrapper");
       await expect(rechartsTooltip).toBeVisible();
-      await expect(rechartsTooltip).toContainText("Total Rating");
+      await expect(rechartsTooltip).toContainText("Median");
     });
   });
 });
