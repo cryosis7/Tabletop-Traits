@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "Board Game Mechanism Analyzer",
+    "subtitle": "Discover which board game mechanisms you love (and hate) based on your BGG ratings."
+  },
+  "sync": {
+    "placeholder": "Enter your BGG username",
+    "button": "Analyze",
+    "syncing": "Syncing...",
+    "syncingMessage": "Syncing collection from BGG...",
+    "loadingMessage": "Loading analysis...",
+    "syncedGames": "Synced {{count}} games from BGG",
+    "syncedAt": " at {{time}}"
+  },
+  "charts": {
+    "bar": "Bar Chart",
+    "radar": "Radar",
+    "scatter": "Scatter",
+    "top20": "Top 20",
+    "all": "All",
+    "bottom20": "Bottom 20",
+    "loadingScores": "Loading scores...",
+    "sectionLabel": "Mechanism analysis"
+  },
+  "collection": {
+    "title": "Your Rated Games",
+    "showing": "Showing {{filtered}} of {{total}}",
+    "loading": "Loading collection...",
+    "game": "Game",
+    "year": "Year",
+    "yourRating": "Your Rating",
+    "mechanisms": "Mechanisms"
+  },
+  "filter": {
+    "searchPlaceholder": "Search mechanisms...",
+    "any": "ANY",
+    "all": "ALL",
+    "clearAll": "Clear all",
+    "games": "Games",
+    "mechanismsCount": "{{count}} mechanisms"
+  },
+  "scoring": {
+    "label": "Scoring method",
+    "arithmetic": "Arithmetic Mean",
+    "arithmeticDesc": "Simple average of all your ratings for games with this mechanism.",
+    "bayesian": "Bayesian Average",
+    "bayesianDesc": "Accounts for sample size - mechanisms with fewer games are pulled closer to your overall average.",
+    "median": "Median",
+    "medianDesc": "The middle rating when sorted. Ignores unusually high or low scores.",
+    "trimmed": "Trimmed Mean",
+    "trimmedDesc": "Average after dropping your highest and lowest 10% of ratings.",
+    "confidence": "Confidence-Adjusted",
+    "confidenceDesc": "Favors mechanisms where your ratings are consistently high across many games.",
+    "positiveRate": "Positive Rate",
+    "positiveRateDesc": "Percentage of games you rated 7 or higher ('Good game' on BGG)."
+  }
+}

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { ScoringMode } from "../types";
 import { SCORING_MODES } from "../types";
 
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function ScoringModeSelector({ mode, onModeChange }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -39,13 +41,13 @@ export function ScoringModeSelector({ mode, onModeChange }: Props): React.ReactE
           aria-haspopup="listbox"
           onClick={() => setOpen(!open)}
         >
-          <span>{selectedConfig.label}</span>
+          <span>{t(`scoring.${selectedConfig.key}`)}</span>
           <span className="mode-selector-chevron" aria-hidden="true">
             {open ? "\u25B2" : "\u25BC"}
           </span>
         </button>
         {open && (
-          <ul className="mode-dropdown" role="listbox" aria-label="Scoring method">
+          <ul className="mode-dropdown" role="listbox" aria-label={t("scoring.label")}>
             {SCORING_MODES.map((m) => (
               <li
                 key={m.key}
@@ -54,8 +56,8 @@ export function ScoringModeSelector({ mode, onModeChange }: Props): React.ReactE
                 className={m.key === mode ? "mode-dropdown-item active" : "mode-dropdown-item"}
                 onMouseDown={() => selectMode(m.key)}
               >
-                <span className="mode-dropdown-label">{m.label}</span>
-                <span className="mode-dropdown-description">{m.description}</span>
+                <span className="mode-dropdown-label">{t(`scoring.${m.key}`)}</span>
+                <span className="mode-dropdown-description">{t(`scoring.${m.key}Desc`)}</span>
               </li>
             ))}
           </ul>

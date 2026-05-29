@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { BoardGame, FilterMode } from "../types";
 import { MechanismTooltip } from "./MechanismTooltip";
 
@@ -21,6 +22,7 @@ export function MechanismFilter({
   descriptions,
   games = [],
 }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,7 +73,7 @@ export function MechanismFilter({
           <input
             type="text"
             className="filter-search"
-            placeholder="Search mechanisms..."
+            placeholder={t("filter.searchPlaceholder")}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -92,7 +94,7 @@ export function MechanismFilter({
               {filteredGames.length > 0 && (
                 <>
                   <li className="dropdown-section-header" aria-hidden="true">
-                    Games
+                    {t("filter.games")}
                   </li>
                   {filteredGames.slice(0, 5).map((g) => (
                     <li
@@ -102,7 +104,7 @@ export function MechanismFilter({
                     >
                       <span>{g.name}</span>
                       <span className="mechanism-description">
-                        {g.mechanisms.filter((m) => !selected.includes(m)).length} mechanisms
+                        {t("filter.mechanismsCount", { count: g.mechanisms.filter((m) => !selected.includes(m)).length })}
                       </span>
                     </li>
                   ))}
@@ -118,14 +120,14 @@ export function MechanismFilter({
             className={filterMode === "any" ? "active" : ""}
             onClick={() => onFilterModeChange("any")}
           >
-            ANY
+            {t("filter.any")}
           </button>
           <button
             type="button"
             className={filterMode === "all" ? "active" : ""}
             onClick={() => onFilterModeChange("all")}
           >
-            ALL
+            {t("filter.all")}
           </button>
         </div>
       </div>
@@ -141,7 +143,7 @@ export function MechanismFilter({
             </span>
           ))}
           <button type="button" className="clear-all" onClick={() => onSelectionChange([])}>
-            Clear all
+            {t("filter.clearAll")}
           </button>
         </div>
       )}

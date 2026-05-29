@@ -1,5 +1,6 @@
 import './App.css'
 import { Dashboard } from './pages/Dashboard'
+import bggLogo from './assets/powered_by_BGG_04_XL.png'
 
 function App() {
   return (
@@ -8,7 +9,7 @@ function App() {
       <footer className="bgg-footer">
         <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer">
           <img
-            src="https://cf.geekdo-images.com/images/geekdo/bgg_cornerlogo.png"
+            src={bggLogo}
             alt="Powered by BoardGameGeek"
             className="bgg-logo"
           />

@@ -1,10 +1,11 @@
 using BoardGameRankings.Domain.Entities;
 using BoardGameRankings.Domain.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace BoardGameRankings.Infrastructure.Persistence;
 
-public class CachedBoardGameRepository(IBggApiClient bggApiClient, IMemoryCache cache) : IBoardGameRepository
+public class CachedBoardGameRepository(IBggApiClient bggApiClient, IMemoryCache cache, ILogger<CachedBoardGameRepository> logger) : IBoardGameRepository
 {
     private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(1);
 
@@ -22,6 +23,9 @@ public class CachedBoardGameRepository(IBggApiClient bggApiClient, IMemoryCache 
             else
                 missingIds.Add(id);
         }
+
+        logger.LogInformation("BoardGame cache: {HitCount} hits, {MissCount} misses out of {TotalCount} requested",
+            results.Count, missingIds.Count, ids.Count);
 
         if (missingIds.Count > 0)
         {

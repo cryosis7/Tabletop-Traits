@@ -3,10 +3,11 @@ using System.Net;
 using System.Xml.Linq;
 using BoardGameRankings.Domain.Entities;
 using BoardGameRankings.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace BoardGameRankings.Infrastructure.BggApi;
 
-public class BggXmlApiClient(HttpClient httpClient) : IBggApiClient
+public class BggXmlApiClient(HttpClient httpClient, ILogger<BggXmlApiClient> logger) : IBggApiClient
 {
     private const int MaxIdsPerRequest = 20;
     private const int MaxRetryAttempts = 5;
@@ -123,10 +124,13 @@ public class BggXmlApiClient(HttpClient httpClient) : IBggApiClient
         try
         {
             var delay = InitialRetryDelay;
+            var absoluteUrl = new Uri(httpClient.BaseAddress!, url).ToString();
 
             for (var attempt = 0; attempt <= MaxRetryAttempts; attempt++)
             {
+                logger.LogInformation("Sending HTTP request GET {Url}", absoluteUrl);
                 var response = await httpClient.GetAsync(url, cancellationToken);
+                logger.LogInformation("Received HTTP {StatusCode} from GET {Url}", (int)response.StatusCode, absoluteUrl);
 
                 if (response.StatusCode == HttpStatusCode.Accepted)
                 {
