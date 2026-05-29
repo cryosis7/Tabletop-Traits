@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import type { FilterMode } from "../types";
+import type { BoardGame, FilterMode } from "../types";
 import { MechanismTooltip } from "./MechanismTooltip";
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
   onSelectionChange: (selected: string[]) => void;
   onFilterModeChange: (mode: FilterMode) => void;
   descriptions: Map<string, string>;
+  games?: BoardGame[];
 }
 
 export function MechanismFilter({
@@ -18,6 +19,7 @@ export function MechanismFilter({
   onSelectionChange,
   onFilterModeChange,
   descriptions,
+  games = [],
 }: Props): React.ReactElement {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -26,6 +28,14 @@ export function MechanismFilter({
   const filtered = mechanisms.filter(
     (m) => m.toLowerCase().includes(query.toLowerCase()) && !selected.includes(m)
   );
+
+  const filteredGames = query
+    ? games.filter(
+        (g) =>
+          g.name.toLowerCase().includes(query.toLowerCase()) &&
+          g.mechanisms.some((m) => !selected.includes(m))
+      )
+    : [];
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -39,6 +49,13 @@ export function MechanismFilter({
 
   function addMechanism(name: string) {
     onSelectionChange([...selected, name]);
+    setQuery("");
+    setOpen(false);
+  }
+
+  function addGameMechanisms(game: BoardGame) {
+    const newMechanisms = game.mechanisms.filter((m) => !selected.includes(m));
+    onSelectionChange([...selected, ...newMechanisms]);
     setQuery("");
     setOpen(false);
   }
@@ -62,9 +79,9 @@ export function MechanismFilter({
             }}
             onFocus={() => setOpen(true)}
           />
-          {open && filtered.length > 0 && (
+          {open && (filtered.length > 0 || filteredGames.length > 0) && (
             <ul className="filter-dropdown">
-              {filtered.slice(0, 15).map((m) => (
+              {filtered.slice(0, 10).map((m) => (
                 <li key={m} onMouseDown={() => addMechanism(m)}>
                   <span>{m}</span>
                   {descriptions.get(m) && (
@@ -72,6 +89,25 @@ export function MechanismFilter({
                   )}
                 </li>
               ))}
+              {filteredGames.length > 0 && (
+                <>
+                  <li className="dropdown-section-header" aria-hidden="true">
+                    Games
+                  </li>
+                  {filteredGames.slice(0, 5).map((g) => (
+                    <li
+                      key={`game-${g.id}`}
+                      className="game-item"
+                      onMouseDown={() => addGameMechanisms(g)}
+                    >
+                      <span>{g.name}</span>
+                      <span className="mechanism-description">
+                        {g.mechanisms.filter((m) => !selected.includes(m)).length} mechanisms
+                      </span>
+                    </li>
+                  ))}
+                </>
+              )}
             </ul>
           )}
         </div>

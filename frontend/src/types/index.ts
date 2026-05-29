@@ -87,6 +87,8 @@ export const SCORING_MODES: ScoringModeConfig[] = [
 
 export type FilterMode = "any" | "all";
 
+export type MechanismCountMode = "top20" | "all" | "bottom20";
+
 export interface MechanismDescription {
   id: number;
   name: string;

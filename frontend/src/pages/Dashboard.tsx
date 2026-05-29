@@ -6,7 +6,7 @@ import { MechanismScatterChart } from "../components/charts/MechanismScatterChar
 import { MechanismFilter } from "../components/MechanismFilter";
 import { MechanismTooltip } from "../components/MechanismTooltip";
 import { ScoringModeSelector } from "../components/ScoringModeSelector";
-import type { ScoringMode, FilterMode } from "../types";
+import type { ScoringMode, FilterMode, MechanismCountMode } from "../types";
 import { SCORING_MODES } from "../types";
 
 export function Dashboard() {
@@ -15,6 +15,7 @@ export function Dashboard() {
   const [activeTab, setActiveTab] = useState<"bar" | "radar" | "scatter">("bar");
   const [selectedMechanisms, setSelectedMechanisms] = useState<string[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>("any");
+  const [countMode, setCountMode] = useState<MechanismCountMode>("top20");
 
   const { sync, syncing, syncStatus, error: syncError } = useSync();
   const { scores, loading: scoresLoading, error: scoresError, fetchScores } = useMechanismScores();
@@ -39,6 +40,12 @@ export function Dashboard() {
     () => [...scores].sort((a, b) => (b[scoreKey] as number) - (a[scoreKey] as number)),
     [scores, scoreKey]
   );
+
+  const displayedScores = useMemo(() => {
+    if (countMode === "all") return sortedScores;
+    if (countMode === "bottom20") return sortedScores.slice(-20);
+    return sortedScores.slice(0, 20);
+  }, [sortedScores, countMode]);
 
   const availableMechanisms = useMemo(
     () => sortedScores.map((s) => s.mechanismName),
@@ -83,6 +90,7 @@ export function Dashboard() {
             onChange={(e) => setUsername(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSync()}
             disabled={syncing}
+            autoComplete="username"
           />
           <button onClick={handleSync} disabled={syncing || !username.trim()}>
             {syncing ? "Syncing..." : "Sync & Analyze"}
@@ -132,13 +140,42 @@ export function Dashboard() {
           </section>
 
           <section className="chart-section" aria-label="Mechanism analysis">
+            <div className="chart-header">
+              <div className="count-toggle">
+                <button
+                  type="button"
+                  aria-pressed={countMode === "top20"}
+                  className={countMode === "top20" ? "active" : ""}
+                  onClick={() => setCountMode("top20")}
+                >
+                  Top 20
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={countMode === "all"}
+                  className={countMode === "all" ? "active" : ""}
+                  onClick={() => setCountMode("all")}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={countMode === "bottom20"}
+                  className={countMode === "bottom20" ? "active" : ""}
+                  onClick={() => setCountMode("bottom20")}
+                >
+                  Bottom 20
+                </button>
+              </div>
+            </div>
             {scoresLoading && <p>Loading scores...</p>}
             {scoresError && <p className="error">{scoresError}</p>}
 
             {activeTab === "bar" && (
               <MechanismBarChart
-                scores={sortedScores}
+                scores={displayedScores}
                 mode={mode}
+                maxItems={displayedScores.length}
                 selectedMechanisms={selectedMechanisms}
                 onBarClick={handleChartClick}
                 descriptions={descriptions}
@@ -146,8 +183,9 @@ export function Dashboard() {
             )}
             {activeTab === "radar" && (
               <MechanismRadarChart
-                scores={sortedScores}
+                scores={displayedScores}
                 mode={mode}
+                maxItems={displayedScores.length}
                 selectedMechanisms={selectedMechanisms}
                 onSegmentClick={handleChartClick}
                 descriptions={descriptions}
@@ -155,7 +193,7 @@ export function Dashboard() {
             )}
             {activeTab === "scatter" && (
               <MechanismScatterChart
-                scores={sortedScores}
+                scores={displayedScores}
                 mode={mode}
                 selectedMechanisms={selectedMechanisms}
                 onPointClick={handleChartClick}
@@ -172,6 +210,7 @@ export function Dashboard() {
               onSelectionChange={setSelectedMechanisms}
               onFilterModeChange={setFilterMode}
               descriptions={descriptions}
+              games={collection}
             />
           </section>
 

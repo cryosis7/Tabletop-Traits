@@ -143,6 +143,23 @@ button.active {
   margin-bottom: 2rem;
 }
 
+.chart-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.count-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.count-toggle button {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
 .collection-section {
   margin-top: 2rem;
 }
@@ -358,6 +375,27 @@ button.active {
   color: #94a3b8;
   margin-top: 2px;
   line-height: 1.3;
+}
+
+.filter-dropdown .dropdown-section-header {
+  padding: 0.4rem 1rem 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  cursor: default;
+  border-top: 1px solid var(--border);
+  margin-top: 0.25rem;
+}
+
+.filter-dropdown .dropdown-section-header:hover {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.filter-dropdown .game-item {
+  border-left: 3px solid var(--primary);
 }
 
 /* Scoring Mode Selector */
