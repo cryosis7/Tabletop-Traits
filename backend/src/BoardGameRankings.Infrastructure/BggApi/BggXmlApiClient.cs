@@ -10,10 +10,10 @@ public class BggXmlApiClient(HttpClient httpClient) : IBggApiClient
 {
     private const int MaxIdsPerRequest = 20;
     private const int MaxRetryAttempts = 5;
+    private const int MaxConcurrentRequests = 5;
     private static readonly TimeSpan InitialRetryDelay = TimeSpan.FromSeconds(2);
 
-    private readonly SemaphoreSlim _rateLimiter = new(1, 1);
-    private DateTime _lastRequestTime = DateTime.MinValue;
+    private readonly SemaphoreSlim _concurrencyLimiter = new(MaxConcurrentRequests, MaxConcurrentRequests);
 
     public async Task<IReadOnlyList<(int GameId, string Name, decimal Rating)>> GetUserRatedCollectionAsync(
         string username, CancellationToken cancellationToken = default)
@@ -27,18 +27,18 @@ public class BggXmlApiClient(HttpClient httpClient) : IBggApiClient
         IEnumerable<int> gameIds, CancellationToken cancellationToken = default)
     {
         var ids = gameIds.Distinct().ToList();
-        var games = new List<BoardGame>(ids.Count);
 
-        foreach (var batch in ids.Chunk(MaxIdsPerRequest))
+        var tasks = ids.Chunk(MaxIdsPerRequest).Select(async batch =>
         {
             var batchIds = new HashSet<int>(batch);
             var idsParam = string.Join(",", batch);
             var url = $"/xmlapi2/thing?id={idsParam}&type=boardgame";
             var xml = await GetXmlWithRetryAsync(url, cancellationToken);
-            games.AddRange(ParseThingXml(xml).Where(g => batchIds.Contains(g.Id)));
-        }
+            return ParseThingXml(xml).Where(g => batchIds.Contains(g.Id));
+        });
 
-        return games;
+        var results = await Task.WhenAll(tasks);
+        return results.SelectMany(g => g).ToList();
     }
 
     private static IReadOnlyList<(int GameId, string Name, decimal Rating)> ParseCollectionXml(string xml)
@@ -119,69 +119,50 @@ public class BggXmlApiClient(HttpClient httpClient) : IBggApiClient
 
     private async Task<string> GetXmlWithRetryAsync(string url, CancellationToken cancellationToken)
     {
-        var delay = InitialRetryDelay;
-
-        for (var attempt = 0; attempt <= MaxRetryAttempts; attempt++)
-        {
-            await RateLimitAsync(cancellationToken);
-
-            var response = await httpClient.GetAsync(url, cancellationToken);
-
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                // BGG returns 202 when the collection is queued for processing - retry after delay
-                if (attempt == MaxRetryAttempts)
-                {
-                    throw new HttpRequestException(
-                        $"BGG API returned 202 (Accepted) after {MaxRetryAttempts} retries. The request is still being processed.");
-                }
-
-                await Task.Delay(delay, cancellationToken);
-                delay *= 2;
-                continue;
-            }
-
-            if (response.StatusCode == HttpStatusCode.TooManyRequests)
-            {
-                if (attempt == MaxRetryAttempts)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-
-                var retryAfter = response.Headers.RetryAfter?.Delta ?? delay;
-                await Task.Delay(retryAfter, cancellationToken);
-                delay *= 2;
-                continue;
-            }
-
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync(cancellationToken);
-        }
-
-        throw new HttpRequestException("Exhausted retry attempts for BGG XML API request.");
-    }
-
-    private async Task RateLimitAsync(CancellationToken cancellationToken)
-    {
-        if (httpClient.BaseAddress?.IsLoopback == true)
-        {
-            return;
-        }
-
-        await _rateLimiter.WaitAsync(cancellationToken);
+        await _concurrencyLimiter.WaitAsync(cancellationToken);
         try
         {
-            var elapsed = DateTime.UtcNow - _lastRequestTime;
-            if (elapsed.TotalMilliseconds < 1100)
+            var delay = InitialRetryDelay;
+
+            for (var attempt = 0; attempt <= MaxRetryAttempts; attempt++)
             {
-                var delay = 1100 - (int)elapsed.TotalMilliseconds;
-                await Task.Delay(delay, cancellationToken);
+                var response = await httpClient.GetAsync(url, cancellationToken);
+
+                if (response.StatusCode == HttpStatusCode.Accepted)
+                {
+                    if (attempt == MaxRetryAttempts)
+                    {
+                        throw new HttpRequestException(
+                            $"BGG API returned 202 (Accepted) after {MaxRetryAttempts} retries. The request is still being processed.");
+                    }
+
+                    await Task.Delay(delay, cancellationToken);
+                    delay *= 2;
+                    continue;
+                }
+
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    if (attempt == MaxRetryAttempts)
+                    {
+                        response.EnsureSuccessStatusCode();
+                    }
+
+                    var retryAfter = response.Headers.RetryAfter?.Delta ?? delay;
+                    await Task.Delay(retryAfter, cancellationToken);
+                    delay *= 2;
+                    continue;
+                }
+
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync(cancellationToken);
             }
-            _lastRequestTime = DateTime.UtcNow;
+
+            throw new HttpRequestException("Exhausted retry attempts for BGG XML API request.");
         }
         finally
         {
-            _rateLimiter.Release();
+            _concurrencyLimiter.Release();
         }
     }
 }

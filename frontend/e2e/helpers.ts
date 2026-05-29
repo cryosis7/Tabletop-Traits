@@ -5,7 +5,7 @@ export const fixtureGameCount = 5;
 export const fixtureGames = ["5-Minute Dungeon", "Dune: Imperium", "Dominion"];
 
 export const paginatedFixtureUsername = "Brezman";
-export const paginatedFixtureGameCount = 370;
+export const paginatedFixtureGameCount = 369;
 export const paginatedFixtureGames = ["1775: Rebellion", "Star Wars: Outer Rim", "Wingspan"];
 
 export async function syncCollection(

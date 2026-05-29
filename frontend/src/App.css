@@ -485,3 +485,25 @@ button.active {
   margin-top: 2px;
   line-height: 1.3;
 }
+
+/* BGG Attribution Footer */
+.bgg-footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.bgg-footer a {
+  display: inline-block;
+}
+
+.bgg-footer .bgg-logo {
+  height: 48px;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.bgg-footer .bgg-logo:hover {
+  opacity: 1;
+}

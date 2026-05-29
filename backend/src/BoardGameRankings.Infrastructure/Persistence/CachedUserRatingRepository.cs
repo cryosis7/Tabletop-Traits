@@ -19,6 +19,7 @@ public class CachedUserRatingRepository(IBggApiClient bggApiClient, IMemoryCache
         var collection = await bggApiClient.GetUserRatedCollectionAsync(username, cancellationToken);
 
         var ratings = collection
+            .DistinctBy(c => c.GameId)
             .Select(c => new UserRating(c.GameId, username, c.Rating))
             .ToList();
 

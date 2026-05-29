@@ -155,9 +155,10 @@ public sealed class BggMockServer : IDisposable
                 .WithBody(cryosis7CollectionXml)
         );
 
-        // XML API2 - Collection for Brezman
-        var brezmanCollectionXml = BuildCollectionXml(
-            BrezmanCollection.Select(g => (g.Id, g.Name, g.Rating)).ToArray());
+        // XML API2 - Collection for Brezman (includes a duplicate entry to match real BGG API behaviour)
+        var brezmanCollectionItems = BrezmanCollection.Select(g => (g.Id, g.Name, g.Rating)).ToList();
+        brezmanCollectionItems.Add(brezmanCollectionItems[0]); // Duplicate first game
+        var brezmanCollectionXml = BuildCollectionXml(brezmanCollectionItems);
 
         _server.Given(
             Request.Create()
@@ -334,7 +335,7 @@ public sealed class BggMockServer : IDisposable
             [330] = ("Ticket to Ride", 8m, 2004),
             [360] = ("Wingspan", 8m, 2019),
             [361] = ("The White Castle", 10m, 2023),
-            [370] = ("Zooscape", 5m, 2015)
+            [369] = ("Zooscape", 5m, 2015)
         };
 
         var mechanismSets = new[]
@@ -356,8 +357,8 @@ public sealed class BggMockServer : IDisposable
             }
         };
 
-        var games = new List<MockCollectionGame>(370);
-        for (var index = 1; index <= 370; index++)
+        var games = new List<MockCollectionGame>(369);
+        for (var index = 1; index <= 369; index++)
         {
             var gameId = 900000 + index;
             var namedGame = namedGames.GetValueOrDefault(index);
