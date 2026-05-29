@@ -42,7 +42,7 @@ test.describe("Collection table", () => {
   test("highlights mechanisms that are selected in the filter", async ({ page }) => {
     const searchInput = page.getByPlaceholder("Search mechanisms...");
     await searchInput.fill("Worker");
-    await page.locator(".filter-dropdown").getByText("Worker Placement").click();
+    await page.locator(".filter-dropdown").getByText("Worker Placement", { exact: true }).click();
 
     // Mechanism text in the table should have highlight class
     const highlighted = page.getByRole("table").locator(".mechanism-highlight");

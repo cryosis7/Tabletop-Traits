@@ -13,7 +13,7 @@ test.describe("Mechanism filter", () => {
 
     const dropdown = page.locator(".filter-dropdown");
     await expect(dropdown).toBeVisible();
-    await dropdown.getByText("Worker Placement").click();
+    await dropdown.getByText("Worker Placement", { exact: true }).click();
 
     // Table should show filtered count
     await expect(
@@ -87,7 +87,7 @@ test.describe("Mechanism filter", () => {
   test("removes a mechanism chip and restores filtered games", async ({ page }) => {
     const searchInput = page.getByPlaceholder("Search mechanisms...");
     await searchInput.fill("Worker");
-    await page.locator(".filter-dropdown").getByText("Worker Placement").click();
+    await page.locator(".filter-dropdown").getByText("Worker Placement", { exact: true }).click();
 
     // Verify filter is active
     await expect(page.getByRole("heading", { level: 2 })).toContainText("Showing");
