@@ -8,6 +8,8 @@ COPY src/BoardGameRankings.Application/BoardGameRankings.Application.csproj src/
 COPY src/BoardGameRankings.Domain/BoardGameRankings.Domain.csproj src/BoardGameRankings.Domain/
 COPY src/BoardGameRankings.Infrastructure/BoardGameRankings.Infrastructure.csproj src/BoardGameRankings.Infrastructure/
 COPY src/BoardGameRankings.DevTools/BoardGameRankings.DevTools.csproj src/BoardGameRankings.DevTools/
+COPY tests/BoardGameRankings.Application.Tests/BoardGameRankings.Application.Tests.csproj tests/BoardGameRankings.Application.Tests/
+COPY tests/BoardGameRankings.Domain.Tests/BoardGameRankings.Domain.Tests.csproj tests/BoardGameRankings.Domain.Tests/
 
 RUN dotnet restore BoardGameRankings.slnx
 
