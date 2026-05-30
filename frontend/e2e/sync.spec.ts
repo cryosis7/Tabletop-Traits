@@ -107,4 +107,19 @@ test.describe("Sync flow", () => {
 
     await expect(page.locator(".error")).toBeVisible();
   });
+
+  test("shows loading spinner immediately on re-sync", async ({ page }) => {
+    await syncCollection(page);
+    await expect(page.getByRole("table")).toBeVisible();
+
+    await page.route(`**/api/sync/${fixtureUsername}`, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await route.fetch();
+      await route.fulfill({ response });
+    });
+
+    await page.getByRole("button", { name: "Analyze" }).click();
+    await expect(page.locator(".loading-spinner")).toBeVisible();
+    await expect(page.getByRole("table")).not.toBeVisible();
+  });
 });

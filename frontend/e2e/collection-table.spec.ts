@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { syncCollection, fixtureGameCount } from "./helpers";
+import { syncCollection, fixtureGameCount, fixtureUsername } from "./helpers";
 
 test.describe("Collection table", () => {
   test.beforeEach(async ({ page }) => {
@@ -53,5 +53,15 @@ test.describe("Collection table", () => {
   test("shows correct row count matching game count", async ({ page }) => {
     const rows = page.getByRole("table").locator("tbody tr");
     await expect(rows).toHaveCount(fixtureGameCount);
+  });
+
+  test("displays a link to the user's BGG collection", async ({ page }) => {
+    const link = page.getByRole("link", { name: "View on BGG" });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute(
+      "href",
+      `https://boardgamegeek.com/collection/user/${fixtureUsername}`
+    );
+    await expect(link).toHaveAttribute("target", "_blank");
   });
 });

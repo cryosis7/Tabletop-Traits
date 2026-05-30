@@ -12,15 +12,17 @@ export function Dashboard() {
   const { t } = useTranslation();
   const [selectedMechanisms, setSelectedMechanisms] = useState<string[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>("any");
+  const [syncedUsername, setSyncedUsername] = useState<string>("");
 
   const { sync, syncing, syncStatus, error: syncError } = useSync();
   const { scores, loading: scoresLoading, fetchScores } = useMechanismScores();
   const { collection, loading: collectionLoading, fetchCollection } = useCollection();
   const { descriptions, fetchDescriptions } = useMechanismDescriptions();
 
-  const dataLoading = scoresLoading || collectionLoading;
+  const dataLoading = syncing || scoresLoading || collectionLoading;
 
   const handleSync = async (username: string) => {
+    setSyncedUsername(username);
     await sync(username);
     await fetchScores(username);
     await fetchCollection(username);
@@ -29,6 +31,11 @@ export function Dashboard() {
 
   const availableMechanisms = useMemo(
     () => [...scores].sort((a, b) => b.arithmeticMean - a.arithmeticMean).map((s) => s.mechanismName),
+    [scores]
+  );
+
+  const mechanismIds = useMemo(
+    () => new Map(scores.map((s) => [s.mechanismName, s.mechanismId])),
     [scores]
   );
 
@@ -81,6 +88,7 @@ export function Dashboard() {
                   onFilterModeChange={setFilterMode}
                   descriptions={descriptions}
                   games={collection}
+                  mechanismIds={mechanismIds}
                 />
               </section>
 
@@ -89,6 +97,7 @@ export function Dashboard() {
                 selectedMechanisms={selectedMechanisms}
                 filterMode={filterMode}
                 descriptions={descriptions}
+                username={syncedUsername}
               />
             </>
           )}

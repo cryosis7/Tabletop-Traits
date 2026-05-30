@@ -8,9 +8,10 @@ interface Props {
   selectedMechanisms: string[];
   filterMode: FilterMode;
   descriptions: Map<string, string>;
+  username?: string;
 }
 
-export function CollectionTable({ collection, selectedMechanisms, filterMode, descriptions }: Props): React.ReactElement {
+export function CollectionTable({ collection, selectedMechanisms, filterMode, descriptions, username }: Props): React.ReactElement {
   const { t } = useTranslation();
   const filteredCollection = useMemo(() => {
     if (selectedMechanisms.length === 0) return collection;
@@ -30,6 +31,16 @@ export function CollectionTable({ collection, selectedMechanisms, filterMode, de
           ? ` (${t("collection.showing", { filtered: filteredCollection.length, total: collection.length })})`
           : ` (${collection.length})`}
       </h2>
+      {username && (
+        <a
+          href={`https://boardgamegeek.com/collection/user/${encodeURIComponent(username)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bgg-link"
+        >
+          {t("collection.viewOnBgg")}
+        </a>
+      )}
       {filteredCollection.length > 0 && (
         <table className="collection-table">
           <thead>

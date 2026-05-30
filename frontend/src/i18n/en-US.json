@@ -32,7 +32,8 @@
     "game": "Game",
     "year": "Year",
     "yourRating": "Your Rating",
-    "mechanisms": "Mechanisms"
+    "mechanisms": "Mechanisms",
+    "viewOnBgg": "View on BGG"
   },
   "filter": {
     "searchPlaceholder": "Search mechanisms...",
@@ -40,7 +41,8 @@
     "all": "ALL",
     "clearAll": "Clear all",
     "games": "Games",
-    "mechanismsCount": "{{count}} mechanisms"
+    "mechanismsCount": "{{count}} mechanisms",
+    "searchBgg": "Search BGG"
   },
   "scoring": {
     "label": "Scoring method",

@@ -166,4 +166,30 @@ test.describe("Mechanism filter", () => {
     await page.getByRole("heading", { level: 1 }).click();
     await expect(dropdown).not.toBeVisible();
   });
+
+  test("shows BGG search link when mechanisms are selected", async ({ page }) => {
+    const searchInput = page.getByPlaceholder("Search mechanisms...");
+    await searchInput.fill("Worker");
+    await page.locator(".filter-dropdown").getByText("Worker Placement", { exact: true }).click();
+
+    const link = page.getByRole("link", { name: "Search BGG" });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("target", "_blank");
+
+    const href = await link.getAttribute("href");
+    expect(href).toContain("boardgamegeek.com/geeksearch.php");
+    expect(href).toContain("propertyids");
+    expect(href).toContain("2082");
+  });
+
+  test("BGG search link disappears when all mechanisms are cleared", async ({ page }) => {
+    const searchInput = page.getByPlaceholder("Search mechanisms...");
+    await searchInput.fill("Worker");
+    await page.locator(".filter-dropdown").getByText("Worker Placement", { exact: true }).click();
+
+    await expect(page.getByRole("link", { name: "Search BGG" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Clear all" }).click();
+    await expect(page.getByRole("link", { name: "Search BGG" })).not.toBeVisible();
+  });
 });

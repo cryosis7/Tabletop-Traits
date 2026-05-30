@@ -3,6 +3,22 @@ import { useTranslation } from "react-i18next";
 import type { BoardGame, FilterMode } from "../types";
 import { MechanismTooltip } from "./MechanismTooltip";
 
+function buildBggSearchUrl(selected: string[], mechanismIds: Map<string, number>): string {
+  const url = new URL("https://boardgamegeek.com/geeksearch.php");
+  url.searchParams.set("action", "search");
+  url.searchParams.set("advsearch", "1");
+  url.searchParams.set("objecttype", "boardgame");
+  url.searchParams.set("q", "");
+  for (const name of selected) {
+    const id = mechanismIds.get(name);
+    if (id != null) {
+      url.searchParams.append("propertyids[]", String(id));
+    }
+  }
+  url.searchParams.set("B1", "Submit");
+  return url.toString();
+}
+
 interface Props {
   mechanisms: string[];
   selected: string[];
@@ -11,6 +27,7 @@ interface Props {
   onFilterModeChange: (mode: FilterMode) => void;
   descriptions: Map<string, string>;
   games?: BoardGame[];
+  mechanismIds?: Map<string, number>;
 }
 
 export function MechanismFilter({
@@ -21,6 +38,7 @@ export function MechanismFilter({
   onFilterModeChange,
   descriptions,
   games = [],
+  mechanismIds = new Map(),
 }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
@@ -145,6 +163,14 @@ export function MechanismFilter({
           <button type="button" className="clear-all" onClick={() => onSelectionChange([])}>
             {t("filter.clearAll")}
           </button>
+          <a
+            href={buildBggSearchUrl(selected, mechanismIds)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bgg-search-link"
+          >
+            {t("filter.searchBgg")}
+          </a>
         </div>
       )}
     </div>
