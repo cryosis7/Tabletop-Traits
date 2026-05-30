@@ -16,7 +16,7 @@ test.describe("Sync flow", () => {
 
   test("syncs a user collection and displays mechanism analysis", async ({ page }) => {
     await expect(
-      page.getByRole("heading", { level: 1, name: "Board Game Mechanism Analyzer" })
+      page.getByRole("heading", { level: 1, name: "Tabletop Traits" })
     ).toBeVisible();
 
     await syncCollection(page);
