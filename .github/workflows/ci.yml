@@ -10,10 +10,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
 
@@ -24,10 +24,9 @@ jobs:
           dotnet test BoardGameRankings.slnx --no-build
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
-          cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
       - name: Frontend lint and typecheck
@@ -36,3 +35,13 @@ jobs:
           npm ci
           npx tsc --noEmit
           npm run lint
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run e2e tests
+        working-directory: frontend
+        run: npx playwright test
+        env:
+          CI: "true"
