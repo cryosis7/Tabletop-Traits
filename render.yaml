@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: board-game-rankings-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: BggApi__BaseUrl
+        value: https://boardgamegeek.com
+      - key: BggApi__BearerToken
+        sync: false
+      - key: Cors__Origins__0
+        value: https://board-game-rankings.onrender.com
+    healthCheckPath: /api/collection/health
+
+  - type: web
+    name: board-game-rankings
+    runtime: static
+    plan: free
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://board-game-rankings-api.onrender.com/api
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

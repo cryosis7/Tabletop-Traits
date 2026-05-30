@@ -25,7 +25,7 @@ done
 
 if [ "$MODE" = "prod" ]; then
   echo "Building frontend..."
-  (cd "$ROOT/frontend" && npm run build)
+  (cd "$ROOT/frontend" && VITE_API_URL="/api" npm run build)
 
   echo "Starting backend (Production)..."
   (cd "$ROOT/backend" && dotnet run --project src/BoardGameRankings.Api --launch-profile Production) &

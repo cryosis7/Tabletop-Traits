@@ -2,7 +2,7 @@ import axios from "axios";
 import type { MechanismScore, BoardGame, SyncStatus, ScoringMode, MechanismDescription } from "../types";
 
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_API_URL || "/api",
 });
 
 export async function syncCollection(username: string): Promise<SyncStatus> {
