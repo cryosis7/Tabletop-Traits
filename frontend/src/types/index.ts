@@ -43,12 +43,6 @@ export interface ScoringModeConfig {
 
 export const SCORING_MODES: ScoringModeConfig[] = [
   {
-    key: "arithmetic",
-    label: "Arithmetic Mean",
-    description: "Simple average of all your ratings for games with this mechanism.",
-    scoreKey: "arithmeticMean",
-  },
-  {
     key: "bayesian",
     label: "Bayesian Average",
     description:
@@ -56,18 +50,18 @@ export const SCORING_MODES: ScoringModeConfig[] = [
     scoreKey: "bayesianAverage",
   },
   {
-    key: "median",
-    label: "Median",
-    description:
-      "The middle rating when sorted. Ignores unusually high or low scores.",
-    scoreKey: "median",
-  },
-  {
     key: "trimmed",
     label: "Trimmed Mean",
     description:
       "Average after dropping your highest and lowest 10% of ratings.",
     scoreKey: "trimmedMean",
+  },
+  {
+    key: "median",
+    label: "Median",
+    description:
+      "The middle rating when sorted. Ignores unusually high or low scores.",
+    scoreKey: "median",
   },
   {
     key: "confidence",
@@ -82,6 +76,12 @@ export const SCORING_MODES: ScoringModeConfig[] = [
     description:
       "Percentage of games you rated 7 or higher ('Good game' on BGG).",
     scoreKey: "positiveRate",
+  },
+  {
+    key: "arithmetic",
+    label: "Arithmetic Mean",
+    description: "Simple average of all your ratings for games with this mechanism.",
+    scoreKey: "arithmeticMean",
   },
 ];
 

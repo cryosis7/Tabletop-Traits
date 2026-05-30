@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import type { MechanismScore, ScoringMode } from "../../types";
 import { SCORING_MODES } from "../../types";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 interface Props {
   scores: MechanismScore[];
@@ -30,6 +31,7 @@ function getRatingColor(value: number, max: number): string {
 }
 
 export function MechanismBarChart({ scores, mode, maxItems = 20, selectedMechanisms = [], onBarClick, descriptions }: Props) {
+  const isMobile = useIsMobile();
   const config = SCORING_MODES.find((m) => m.key === mode)!;
   const data = scores.slice(0, maxItems).map((s) => ({
     name: s.mechanismName,
@@ -38,21 +40,23 @@ export function MechanismBarChart({ scores, mode, maxItems = 20, selectedMechani
   }));
 
   const maxValue = Math.max(...data.map((d) => d.value), 1);
+  const leftMargin = isMobile ? 90 : 140;
+  const yAxisWidth = isMobile ? 80 : 130;
 
   return (
-    <div style={{ width: "100%", height: Math.max(400, data.length * 28) }}>
+    <div style={{ width: "100%", height: Math.max(400, data.length * (isMobile ? 32 : 28)) }}>
       <ResponsiveContainer>
-        <BarChart data={data} layout="vertical" margin={{ left: 140, right: 20, top: 10, bottom: 10 }}>
+        <BarChart data={data} layout="vertical" margin={{ left: leftMargin, right: 10, top: 10, bottom: 10 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" domain={[0, "auto"]} />
-          <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 12 }} />
+          <YAxis type="category" dataKey="name" width={yAxisWidth} tick={{ fontSize: isMobile ? 10 : 12 }} />
           <Tooltip
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
               const data = payload[0].payload as { name: string; value: number; gameCount: number };
               const desc = descriptions?.get(data.name);
               return (
-                <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px", maxWidth: 300 }}>
+                <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px" }}>
                   <strong style={{ color: "#a5b4fc" }}>{data.name}</strong>
                   {desc && <p style={{ margin: "4px 0 6px", fontSize: "0.8rem", opacity: 0.85 }}>{desc}</p>}
                   <p style={{ margin: 0, fontSize: "0.85rem" }}>

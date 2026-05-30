@@ -56,7 +56,7 @@ export function MechanismScatterChart({ scores, mode, selectedMechanisms = [], o
               const entry = payload[0].payload as { name: string; gameCount: number; score: number };
               const desc = descriptions?.get(entry.name);
               return (
-                <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px", maxWidth: 300 }}>
+                <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px" }}>
                   <strong style={{ color: "#a5b4fc" }}>{entry.name}</strong>
                   {desc && <p style={{ margin: "4px 0 6px", fontSize: "0.8rem", opacity: 0.85 }}>{desc}</p>}
                   <p style={{ margin: 0, fontSize: "0.85rem" }}>

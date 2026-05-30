@@ -16,7 +16,7 @@ interface Props {
 
 export function ChartPanel({ scores, selectedMechanisms, onBarClick, descriptions }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [mode, setMode] = useState<ScoringMode>("arithmetic");
+  const [mode, setMode] = useState<ScoringMode>("bayesian");
   const [activeTab, setActiveTab] = useState<"bar" | "radar" | "scatter">("bar");
   const [countMode, setCountMode] = useState<MechanismCountMode>("top20");
 

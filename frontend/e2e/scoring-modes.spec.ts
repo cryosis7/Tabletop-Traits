@@ -7,9 +7,9 @@ test.describe("Scoring modes", () => {
     await syncCollection(page);
   });
 
-  test("defaults to arithmetic scoring mode", async ({ page }) => {
+  test("defaults to bayesian scoring mode", async ({ page }) => {
     const trigger = page.locator("#scoring-mode-select");
-    await expect(trigger).toContainText("Arithmetic Mean");
+    await expect(trigger).toContainText("Bayesian Average");
   });
 
   test("switches scoring mode via dropdown", async ({ page }) => {

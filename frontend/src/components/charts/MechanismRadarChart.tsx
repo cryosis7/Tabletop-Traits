@@ -66,7 +66,7 @@ export function MechanismRadarChart({ scores, mode, maxItems = 10, selectedMecha
               const entry = payload[0].payload as { mechanism: string; rating: number };
               const desc = descriptions?.get(entry.mechanism);
               return (
-                <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px", maxWidth: 300 }}>
+                <div className="mechanism-tooltip-content" style={{ background: "#1e293b", color: "#f1f5f9", borderRadius: 6, padding: "8px 12px" }}>
                   <strong style={{ color: "#a5b4fc" }}>{entry.mechanism}</strong>
                   {desc && <p style={{ margin: "4px 0 6px", fontSize: "0.8rem", opacity: 0.85 }}>{desc}</p>}
                   <p style={{ margin: 0, fontSize: "0.85rem" }}>

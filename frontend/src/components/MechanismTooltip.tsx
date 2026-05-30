@@ -16,9 +16,16 @@ export function MechanismTooltip({ text, description, className, children }: Pro
   useEffect(() => {
     if (visible && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
+      const tooltipWidth = tooltipRef.current?.offsetWidth ?? 200;
+      const centeredLeft = rect.left + rect.width / 2;
+      const padding = 8;
+      const clampedLeft = Math.max(
+        tooltipWidth / 2 + padding,
+        Math.min(centeredLeft, window.innerWidth - tooltipWidth / 2 - padding)
+      );
       setPosition({
         top: rect.top - 8,
-        left: rect.left + rect.width / 2,
+        left: clampedLeft,
       });
     }
   }, [visible]);

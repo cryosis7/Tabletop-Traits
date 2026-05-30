@@ -408,6 +408,21 @@ button.active {
   margin: 0;
 }
 
+@media (max-width: 768px) {
+  .recharts-tooltip-wrapper {
+    position: absolute !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .mechanism-tooltip-content {
+    max-width: min(85vw, 320px);
+    font-size: 0.85rem;
+    padding: 10px 14px;
+  }
+}
+
 .filter-dropdown .mechanism-description {
   display: block;
   font-size: 0.75rem;
