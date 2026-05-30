@@ -25,7 +25,7 @@ backend/**/obj/
 *.nupkg
 
 ## Data files (generated at runtime)
-backend/data/
+backend/data/*
 !backend/data/mechanisms.json
 
 # =============================================================================
