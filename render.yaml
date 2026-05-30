@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: board-game-rankings-api
+    name: tabletop-traits-api
     runtime: docker
     plan: free
     dockerfilePath: ./backend/Dockerfile
@@ -13,18 +13,18 @@ services:
       - key: BggApi__BearerToken
         sync: false
       - key: Cors__Origins__0
-        value: https://board-game-rankings.onrender.com
+        value: https://tabletop-traits.onrender.com
     healthCheckPath: /api/collection/health
 
   - type: web
-    name: board-game-rankings
+    name: tabletop-traits
     runtime: static
     plan: free
     buildCommand: cd frontend && npm ci && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://board-game-rankings-api.onrender.com/api
+        value: https://tabletop-traits-api.onrender.com/api
     headers:
       - path: /*
         name: Cache-Control
