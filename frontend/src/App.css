@@ -1,7 +1,7 @@
 :root {
   --bg: #1a1a2e;
   --surface: #16213e;
-  --primary: #6366f1;
+  --primary: #5b5eeb;
   --primary-hover: #4f46e5;
   --text: #e2e8f0;
   --text-muted: #94a3b8;
@@ -167,6 +167,15 @@ button.active {
 .collection-section h2 {
   margin-bottom: 1rem;
   font-size: 1.3rem;
+}
+
+.bgg-link {
+  color: #a5b4fc;
+  text-decoration: underline;
+}
+
+.bgg-link:hover {
+  color: #c7d2fe;
 }
 
 .collection-table {

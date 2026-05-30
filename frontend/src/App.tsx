@@ -8,7 +8,9 @@ function App() {
 
   return (
     <>
-      <Dashboard />
+      <main>
+        <Dashboard />
+      </main>
       <footer className="bgg-footer">
         <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer">
           <img
