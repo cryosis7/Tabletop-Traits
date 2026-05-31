@@ -122,4 +122,29 @@ test.describe("Sync flow", () => {
     await expect(page.locator(".loading-spinner")).toBeVisible();
     await expect(page.getByRole("table")).not.toBeVisible();
   });
+
+  test("shows cold-start hint after loading for 10 seconds", async ({ page }) => {
+    // Install fake timers before navigating so setTimeout is intercepted
+    await page.clock.install();
+    await page.goto("/");
+
+    // Intercept sync to keep the spinner visible indefinitely
+    await page.route(`**/api/sync/${fixtureUsername}`, () => {});
+
+    await page.getByPlaceholder("Enter your BGG username").fill(fixtureUsername);
+    await page.getByRole("button", { name: "Analyze" }).click();
+
+    await expect(page.locator(".loading-spinner")).toBeVisible();
+    await expect(page.locator(".cold-start-hint")).not.toBeVisible();
+
+    // Fast-forward the page clock past the 10s threshold
+    await page.clock.fastForward(10_000);
+
+    await expect(page.locator(".cold-start-hint")).toBeVisible();
+    await expect(page.locator(".cold-start-hint")).toHaveText(
+      "This can sometimes take up to a minute"
+    );
+
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+  });
 });

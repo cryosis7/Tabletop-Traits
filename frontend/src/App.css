@@ -241,6 +241,20 @@ button.active {
   font-size: 0.9rem;
 }
 
+.cold-start-hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 0.5rem;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @media (max-width: 768px) {
   .dashboard {
     padding: 1rem;
