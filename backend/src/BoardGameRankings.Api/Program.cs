@@ -63,6 +63,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.MapGet("/api/ping", () => Results.Ok()).ExcludeFromDescription();
 app.MapControllers();
 
 app.Lifetime.ApplicationStopping.Register(() => bggMock?.Dispose());

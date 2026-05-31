@@ -3,7 +3,8 @@
     "title": "Tabletop Traits"
   },
   "sync": {
-    "button": "Analyse"
+    "button": "Analyse",
+    "coldStartHint": "This can sometimes take up to a minute"
   },
   "scoring": {
     "confidenceDesc": "Favours mechanisms where your ratings are consistently high across many games."

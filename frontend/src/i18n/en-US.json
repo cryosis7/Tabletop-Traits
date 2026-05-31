@@ -11,7 +11,8 @@
     "syncingMessage": "Syncing collection from BGG...",
     "loadingMessage": "Loading analysis...",
     "syncedGames": "Synced {{count}} games from BGG",
-    "syncedAt": " at {{time}}"
+    "syncedAt": " at {{time}}",
+    "coldStartHint": "This can sometimes take up to a minute"
   },
   "charts": {
     "bar": "Bar Chart",
