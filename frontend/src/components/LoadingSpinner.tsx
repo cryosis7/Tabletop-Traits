@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-const COLD_START_DELAY_MS = 10_000;
+const COLD_START_DELAY_MS = 7_000;
 
 interface Props {
   message?: string;
